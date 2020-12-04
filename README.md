@@ -1,2 +1,2 @@
 # ESANet: Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis
-Coming soon
+Coming on December 6th, 2020.
