@@ -62,14 +62,9 @@ if __name__ == '__main__':
     if not os.path.exists(zip_file_path):
         download_file(DATASET_URL, zip_file_path,
                       display_progressbar=True)
-    zipdata = ZipFile(zip_file_path)
-    zipinfos = zipdata.infolist()
     print('Extract images')
-    # remove toplevel directory of the paths
-    for zipinfo in tqdm(zipinfos[1:]):
-        save_path = os.path.join(output_path,
-                                 zipinfo.filename.lstrip('SUNRGBD/'))
-        zipdata.extract(zipinfo, save_path)
+    with ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(os.path.dirname(zip_file_path))
     os.remove(zip_file_path)
 
     # extract labels from SUNRGBD toolbox
@@ -95,7 +90,7 @@ if __name__ == '__main__':
 
     seglabel = SUNRGBD2Dseg['SUNRGBD2Dseg']['seglabel']
 
-    for i, meta in enumerate(SUNRGBDMeta):
+    for i, meta in tqdm(enumerate(SUNRGBDMeta)):
         meta_dir = '/'.join(meta.rgbpath.split('/')[:-2])
         real_dir = meta_dir.split('/n/fs/sun3d/data/SUNRGBD/')[1]
         depth_bfx_path = os.path.join(real_dir, 'depth_bfx/' + meta.depthname)
@@ -113,13 +108,13 @@ if __name__ == '__main__':
             np.save(label_path_full, label)
 
         if meta_dir in split_train:
-            img_dir_train.append(rgb_path)
-            depth_dir_train.append(depth_bfx_path)
-            label_dir_train.append(label_path)
+            img_dir_train.append(os.path.join('SUNRGBD', rgb_path))
+            depth_dir_train.append(os.path.join('SUNRGBD', depth_bfx_path))
+            label_dir_train.append(os.path.join('SUNRGBD', label_path))
         else:
-            img_dir_test.append(rgb_path)
-            depth_dir_test.append(depth_bfx_path)
-            label_dir_test.append(label_path)
+            img_dir_test.append(os.path.join('SUNRGBD', rgb_path))
+            depth_dir_test.append(os.path.join('SUNRGBD', depth_bfx_path))
+            label_dir_test.append(os.path.join('SUNRGBD', label_path))
 
     # write file lists
     def _write_list_to_file(list_, filepath):
