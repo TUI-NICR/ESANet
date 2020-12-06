@@ -1,0 +1,88 @@
+diff -x .git -x .gitignore -x '*.DS_Store' -r -N -r -u ./RedNet_model.py esanet/src/models/external_code/RedNet/RedNet_model.py
+--- ./RedNet_model.py	2020-12-06 11:03:46.000000000 +0100
++++ esanet/src/models/external_code/RedNet/RedNet_model.py	2020-12-06 11:21:01.000000000 +0100
+@@ -7,12 +7,15 @@
+ 
+ 
+ class RedNet(nn.Module):
+-    def __init__(self, num_classes=37, pretrained=False):
++    def __init__(self, layers=None, block=None, num_classes=37,
++                 pretrained=False):
+ 
+         super(RedNet, self).__init__()
+-        block = Bottleneck
+         transblock = TransBasicBlock
+-        layers = [3, 4, 6, 3]
++        if block is None:
++            block = Bottleneck
++        if layers is None:
++            layers = [3, 4, 6, 3]
+         # original resnet
+         self.inplanes = 64
+         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+@@ -42,10 +45,10 @@
+         self.deconv4 = self._make_transpose(transblock, 64, 3, stride=2)
+ 
+         self.agant0 = self._make_agant_layer(64, 64)
+-        self.agant1 = self._make_agant_layer(64 * 4, 64)
+-        self.agant2 = self._make_agant_layer(128 * 4, 128)
+-        self.agant3 = self._make_agant_layer(256 * 4, 256)
+-        self.agant4 = self._make_agant_layer(512 * 4, 512)
++        self.agant1 = self._make_agant_layer(64 * block.expansion, 64)
++        self.agant2 = self._make_agant_layer(128 * block.expansion, 128)
++        self.agant3 = self._make_agant_layer(256 * block.expansion, 256)
++        self.agant4 = self._make_agant_layer(512 * block.expansion, 512)
+ 
+         # final block
+         self.inplanes = 64
+diff -x .git -x .gitignore -x '*.DS_Store' -r -N -r -u ./to_onnx.py esanet/src/models/external_code/RedNet/to_onnx.py
+--- ./to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/RedNet/to_onnx.py	2020-12-06 11:28:21.000000000 +0100
+@@ -0,0 +1,47 @@
++import os
++
++import torch
++from torchvision.models.resnet import BasicBlock
++
++from RedNet_model import RedNet
++
++
++def export_to_onnx(model, outname):
++    H = 480
++    W = 640
++
++    rgb = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++    depth = torch.rand(size=(1, 1, H, W), dtype=torch.float32)
++
++    model.eval()
++
++    out_dir = '../onnx_models'
++    os.makedirs(out_dir, exist_ok=True)
++    filepath = os.path.join(out_dir, outname)
++
++    torch.onnx.export(model,
++                      (rgb, depth),
++                      filepath,
++                      export_params=True,
++                      input_names=['rgb', 'depth'],
++                      output_names=['output'],
++                      do_constant_folding=True,
++                      verbose=False,
++                      opset_version=10
++                      )
++    print(f'exported {filepath}')
++
++
++if __name__ == '__main__':
++    N_CLASSES = 40
++    rednet152 = RedNet(layers=[3, 8, 36, 3], num_classes=N_CLASSES)
++    export_to_onnx(rednet152, 'rednet152.onnx')
++
++    rednet101 = RedNet(layers=[3, 4, 23, 3], num_classes=N_CLASSES)
++    export_to_onnx(rednet101, 'rednet101.onnx')
++
++    rednet50 = RedNet(num_classes=N_CLASSES)
++    export_to_onnx(rednet50, 'rednet50.onnx')
++
++    rednet34 = RedNet(block=BasicBlock, num_classes=N_CLASSES)
++    export_to_onnx(rednet34, 'rednet34.onnx')

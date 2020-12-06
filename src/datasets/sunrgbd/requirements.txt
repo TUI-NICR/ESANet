@@ -1,0 +1,5 @@
+h5py
+numpy
+scipy
+tqdm
+zipfile

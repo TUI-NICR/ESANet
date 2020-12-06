@@ -1,0 +1,322 @@
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./configs/rn18_single_scale.py esanet/src/models/external_code/swiftnet/configs/rn18_single_scale.py
+--- ./configs/rn18_single_scale.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/configs/rn18_single_scale.py	2020-12-06 10:37:49.000000000 +0100
+@@ -19,7 +19,7 @@
+ path = os.path.abspath(__file__)
+ dir_path = os.path.dirname(path)
+ 
+-evaluating = False
++evaluating = True
+ random_crop_size = 768
+ 
+ scale = 1
+@@ -42,6 +42,7 @@
+ 
+ trans_val = Compose(
+     [Open(),
++     RemapLabels(Cityscapes.map_to_id, Cityscapes.num_classes),
+      SetTargetSize(target_size=target_size, target_size_feats=target_size_feats),
+      Tensor(),
+      ]
+@@ -53,6 +54,7 @@
+     trans_train = Compose(
+         [Open(),
+          RandomFlip(),
++         RemapLabels(Cityscapes.map_to_id, Cityscapes.num_classes),
+          RandomSquareCropAndScale(random_crop_size, ignore_id=num_classes, mean=mean_rgb),
+          SetTargetSize(target_size=target_size_crops, target_size_feats=target_size_crops_feats),
+          Tensor(),
+@@ -61,11 +63,13 @@
+ 
+ dataset_train = Cityscapes(root, transforms=trans_train, subset='train')
+ dataset_val = Cityscapes(root, transforms=trans_val, subset='val')
++dataset_test = Cityscapes(root, transforms=trans_val, subset='test')
+ 
+ resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)
+ model = SemsegModel(resnet, num_classes)
+ if evaluating:
+-    model.load_state_dict(torch.load('weights/rn18_single_scale/model_best.pt'))
++    weight_path = './swiftnet_weights/rn18_single_scale/model_best.pt'
++    model.load_state_dict(torch.load(weight_path))
+ else:
+     model.criterion = SemsegCrossEntropy(num_classes=num_classes, ignore_id=ignore_id)
+     lr = 4e-4
+@@ -83,16 +87,18 @@
+     optimizer = optim.Adam(optim_params, betas=(0.9, 0.99))
+     lr_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, epochs, lr_min)
+ 
+-batch_size = 14
++batch_size = 1
+ print(f'Batch size: {batch_size}')
+ 
+ if evaluating:
+     loader_train = DataLoader(dataset_train, batch_size=1, collate_fn=custom_collate)
+ else:
+-    loader_train = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, num_workers=4,
++    loader_train = DataLoader(dataset_train, batch_size=batch_size,
++                              shuffle=True, num_workers=0,
+                               pin_memory=True,
+                               drop_last=True, collate_fn=custom_collate)
+ loader_val = DataLoader(dataset_val, batch_size=1, collate_fn=custom_collate)
++loader_test = DataLoader(dataset_test, batch_size=1, collate_fn=custom_collate)
+ 
+ total_params = get_n_params(model.parameters())
+ ft_params = get_n_params(model.fine_tune_params())
+@@ -103,7 +109,11 @@
+ print(f'SPP params: {spp_params:,}')
+ 
+ if evaluating:
+-    eval_loaders = [(loader_val, 'val'), (loader_train, 'train')]
++    eval_loaders = [
++        # (loader_test, 'test'),
++        (loader_val, 'val'),
++        (loader_train, 'train')
++    ]
+     store_dir = f'{dir_path}/out/'
+     for d in ['', 'val', 'train', 'training']:
+         os.makedirs(store_dir + d, exist_ok=True)
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./data/cityscapes/cityscapes.py esanet/src/models/external_code/swiftnet/data/cityscapes/cityscapes.py
+--- ./data/cityscapes/cityscapes.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/data/cityscapes/cityscapes.py	2020-12-04 17:56:53.000000000 +0100
+@@ -45,9 +45,9 @@
+         self.subset = subset
+         self.has_labels = subset != 'test'
+         self.open_depth = open_depth
+-        self.images = list(sorted(self.images_dir.glob('*/*.ppm')))
++        self.images = list(sorted(self.images_dir.glob('*/*.png')))
+         if self.has_labels:
+-            self.labels = list(sorted(self.labels_dir.glob('*/*.png')))
++            self.labels = list(sorted(self.labels_dir.glob('*/*labelIds.png')))
+         self.transforms = transforms
+         self.epoch = epoch
+ 
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./eval.py esanet/src/models/external_code/swiftnet/eval.py
+--- ./eval.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/eval.py	2020-12-04 17:56:53.000000000 +0100
+@@ -12,7 +12,8 @@
+ 
+ 
+ parser = argparse.ArgumentParser(description='Detector train')
+-parser.add_argument('config', type=str, help='Path to configuration .py file')
++parser.add_argument('--config', type=str, help='Path to configuration .py file',
++                    default='configs/rn18_single_scale.py')
+ parser.add_argument('--profile', dest='profile', action='store_true', help='Profile one forward pass')
+ 
+ if __name__ == '__main__':
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./evaluation/evaluate.py esanet/src/models/external_code/swiftnet/evaluation/evaluate.py
+--- ./evaluation/evaluate.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/evaluation/evaluate.py	2020-12-06 10:39:38.000000000 +0100
+@@ -1,5 +1,8 @@
+ import contextlib
+ 
++import os
++
++import cv2
+ import numpy as np
+ import torch
+ from tqdm import tqdm
+@@ -67,6 +70,7 @@
+ 
+ 
+ def evaluate_semseg(model, data_loader, class_info, observers=()):
++    out_dir = './swiftnet'
+     model.eval()
+     managers = [torch.no_grad()] + list(observers)
+     with contextlib.ExitStack() as stack:
+@@ -75,11 +79,19 @@
+         conf_mat = np.zeros((model.num_classes, model.num_classes), dtype=np.uint64)
+         for step, batch in tqdm(enumerate(data_loader), total=len(data_loader)):
+             batch['original_labels'] = batch['original_labels'].numpy().astype(np.uint32)
+-            logits, additional = model.do_forward(batch, batch['original_labels'].shape[1:3])
++            logits, additional = model.do_forward(batch, batch['target_size'])
+             pred = torch.argmax(logits.data, dim=1).byte().cpu().numpy().astype(np.uint32)
+             for o in observers:
+                 o(pred, batch, additional)
+             cylib.collect_confusion_matrix(pred.flatten(), batch['original_labels'].flatten(), conf_mat)
++
++            for i, name in enumerate(batch['name']):
++                out_dir2 = os.path.join(out_dir, batch['subset'][i])
++                os.makedirs(out_dir2)
++                p = pred[i, :, :].astype(np.uint8)
++                p = cv2.cvtColor(p, cv2.COLOR_RGB2BGR)
++                cv2.imwrite(os.path.join(out_dir2, name + '.png'), p)
++
+         print('')
+         pixel_acc, iou_acc, recall, precision, _, per_class_iou = compute_errors(conf_mat, class_info, verbose=True)
+     model.train()
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./get_model.py esanet/src/models/external_code/swiftnet/get_model.py
+--- ./get_model.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/get_model.py	2020-12-04 17:56:53.000000000 +0100
+@@ -0,0 +1,10 @@
++from src.models.external_code.swiftnet.models.semseg import SemsegModel
++from src.models.external_code.swiftnet.models.resnet.resnet_single_scale import resnet18
++
++
++def get_swiftnet(n_classes=19, height=512, width=1024):
++    resnet = resnet18(pretrained=True, efficient=False,
++                      with_mean_std_scale=False)
++    model = SemsegModel(resnet, n_classes, image_size=(height, width),
++                        logits_only=True)
++    return model
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./models/resnet/resnet_single_scale.py esanet/src/models/external_code/swiftnet/models/resnet/resnet_single_scale.py
+--- ./models/resnet/resnet_single_scale.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/models/resnet/resnet_single_scale.py	2020-12-04 17:56:53.000000000 +0100
+@@ -6,7 +6,7 @@
+ from math import log2
+ 
+ from ..util import _Upsample, SpatialPyramidPooling, SeparableConv2d
+-from evaluation.evaluate import mt
++# from evaluation.evaluate import mt
+ 
+ __all__ = ['ResNet', 'resnet18', 'resnet18dws', 'resnet34', 'resnet50', 'resnet101', 'resnet152', 'BasicBlock']
+ 
+@@ -129,16 +129,18 @@
+                  detach_upsample_skips=(), detach_upsample_in=False,
+                  target_size=None, output_stride=4, mean=(73.1584, 82.9090, 72.3924),
+                  std=(44.9149, 46.1529, 45.3192), scale=1, separable=False,
+-                 upsample_separable=False, **kwargs):
++                 upsample_separable=False, with_mean_std_scale=True, **kwargs):
+         super(ResNet, self).__init__()
+         self.inplanes = 64
+         self.efficient = efficient
+         self.use_bn = use_bn
+         self.separable = separable
+-        self.register_buffer('img_mean', torch.tensor(mean).view(1, -1, 1, 1))
+-        self.register_buffer('img_std', torch.tensor(std).view(1, -1, 1, 1))
+-        if scale != 1:
+-            self.register_buffer('img_scale', torch.tensor(scale).view(1, -1, 1, 1).float())
++        self.with_mean_std_scale = with_mean_std_scale
++        if with_mean_std_scale:
++            self.register_buffer('img_mean', torch.tensor(mean).view(1, -1, 1, 1))
++            self.register_buffer('img_std', torch.tensor(std).view(1, -1, 1, 1))
++            if scale != 1:
++                self.register_buffer('img_scale', torch.tensor(scale).view(1, -1, 1, 1).float())
+ 
+         self.detach_upsample_in = detach_upsample_in
+         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
+@@ -229,10 +231,11 @@
+         return x, skip
+ 
+     def forward_down(self, image):
+-        if hasattr(self, 'img_scale'):
+-            image /= self.img_scale
+-        image -= self.img_mean
+-        image /= self.img_std
++        if self.with_mean_std_scale:
++            if hasattr(self, 'img_scale'):
++                image /= self.img_scale
++            image -= self.img_mean
++            image /= self.img_std
+ 
+         x = self.conv1(image)
+         x = self.bn1(x)
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./models/semseg.py esanet/src/models/external_code/swiftnet/models/semseg.py
+--- ./models/semseg.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/models/semseg.py	2020-12-04 17:56:53.000000000 +0100
+@@ -10,7 +10,8 @@
+ class SemsegModel(nn.Module):
+     def __init__(self, backbone, num_classes, num_inst_classes=None, use_bn=True, k=1, bias=True,
+                  loss_ret_additional=False, upsample_logits=True, logit_class=_BNReluConv,
+-                 multiscale_factors=(.5, .75, 1.5, 2.)):
++                 multiscale_factors=(.5, .75, 1.5, 2.), image_size=(512, 1024),
++                 logits_only=False):
+         super(SemsegModel, self).__init__()
+         self.backbone = backbone
+         self.num_classes = num_classes
+@@ -23,12 +24,20 @@
+         self.img_req_grad = loss_ret_additional
+         self.upsample_logits = upsample_logits
+         self.multiscale_factors = multiscale_factors
++        self.image_size = image_size
++        self.logits_only = logits_only
+ 
+-    def forward(self, image, target_size, image_size):
++    def forward(self, image, target_size=None):
++        if target_size is None:
++            target_size = (192, 192)
+         features, additional = self.backbone(image)
+         logits = self.logits.forward(features)
+         if (not self.training) or self.upsample_logits:
+-            logits = upsample(logits, image_size)
++            logits = upsample(logits, self.image_size)
++        if self.logits_only:
++            if self.training:
++                return [logits]
++            return logits
+         if hasattr(self, 'border_logits'):
+             additional['border_logits'] = self.border_logits(features).sigmoid()
+         additional['logits'] = logits
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./models/util.py esanet/src/models/external_code/swiftnet/models/util.py
+--- ./models/util.py	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/models/util.py	2020-12-04 17:56:53.000000000 +0100
+@@ -69,7 +69,7 @@
+         skip = self.bottleneck.forward(skip)
+         if self.detach_skip:
+             skip = skip.detach()
+-        skip_size = skip.size()[2:4]
++        skip_size = (int(skip.size()[2]), int(skip.size()[3]))
+         x = self.upsampling_method(x, skip_size)
+         if self.use_skip:
+             x = x + skip
+@@ -132,9 +132,12 @@
+ 
+     def forward(self, x):
+         levels = []
+-        target_size = self.fixed_size if self.fixed_size is not None else x.size()[2:4]
++        if self.fixed_size is not None:
++            target_size = self.fixed_size
++        else:
++            target_size = (int(x.size()[2]), int(x.size()[3]))
+ 
+-        ar = target_size[1] / target_size[0]
++        ar = float(target_size[1] / target_size[0])
+ 
+         x = self.spp[0].forward(x)
+         levels.append(x)
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./requirements.txt esanet/src/models/external_code/swiftnet/requirements.txt
+--- ./requirements.txt	2020-12-06 10:21:29.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/requirements.txt	2020-12-04 17:56:53.000000000 +0100
+@@ -3,3 +3,4 @@
+ torchvision==0.4.2
+ numpy==1.17.4
+ tqdm==4.28.1
++Cython>=0.29.21
+diff -x .git -x .gitignore -x '*.png' -x lib -r -N -r -u ./to_onnx.py esanet/src/models/external_code/swiftnet/to_onnx.py
+--- ./to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/swiftnet/to_onnx.py	2020-12-06 10:41:44.000000000 +0100
+@@ -0,0 +1,35 @@
++import os
++import torch
++from models.semseg import SemsegModel
++from models.resnet.resnet_single_scale import resnet18
++
++N_CLASSES = 19
++H = 512
++W = 1024
++
++# H = 1024
++# W = 2048
++
++scale = 1
++mean = [73.15, 82.90, 72.3]
++std = [47.67, 48.49, 47.73]
++resnet = resnet18(pretrained=True, efficient=False, mean=mean, std=std, scale=scale)
++model = SemsegModel(resnet, N_CLASSES)
++model.eval()
++
++rgb = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++
++out_dir = '../onnx_models'
++os.makedirs(out_dir, exist_ok=True)
++onnx_file_path = os.path.join(out_dir, 'swiftnet.onnx')
++
++torch.onnx.export(model,
++                  rgb,
++                  onnx_file_path,
++                  export_params=True,
++                  input_names=['rgb'],
++                  output_names=['output'],
++                  do_constant_folding=True,
++                  verbose=False,
++                  opset_version=11
++                  )

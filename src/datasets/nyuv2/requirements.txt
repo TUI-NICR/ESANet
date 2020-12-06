@@ -1,0 +1,4 @@
+h5py
+pillow
+scipy
+tqdm

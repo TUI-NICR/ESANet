@@ -1,0 +1,101 @@
+diff -x .git -x .gitignore -r -N -r -u ./pytorch/pytorchcv/model_provider.py esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/model_provider.py
+--- ./pytorch/pytorchcv/model_provider.py	2020-12-06 10:53:37.000000000 +0100
++++ esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/model_provider.py	2020-12-04 17:56:52.000000000 +0100
+@@ -137,7 +137,7 @@
+ # from .models.others.oth_prnet import *
+ # from .models.others.oth_sinet import *
+ # from .models.others.oth_ibppose import *
+-from .models.others.oth_bisenet1 import *
++# from .models.others.oth_bisenet1 import *
+ 
+ 
+ __all__ = ['get_model']
+@@ -1051,7 +1051,7 @@
+ 
+     # 'oth_ibppose': oth_ibppose,
+ 
+-    'oth_bisenet': oth_bisenet,
++    # 'oth_bisenet': oth_bisenet,
+ }
+ 
+ 
+diff -x .git -x .gitignore -r -N -r -u ./pytorch/pytorchcv/models/common.py esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/common.py
+--- ./pytorch/pytorchcv/models/common.py	2020-12-06 10:53:37.000000000 +0100
++++ esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/common.py	2020-12-04 17:56:52.000000000 +0100
+@@ -1171,7 +1171,7 @@
+                  scale_factor,
+                  out_size=None,
+                  mode="bilinear",
+-                 align_corners=True,
++                 align_corners=False,
+                  up=True):
+         super(InterpolationBlock, self).__init__()
+         self.scale_factor = scale_factor
+@@ -1189,9 +1189,10 @@
+                 mode=self.mode,
+                 align_corners=self.align_corners)
+         else:
++            out_size = self.calc_out_size(x) if size is None else size
+             return F.interpolate(
+                 input=x,
+-                scale_factor=self.scale_factor,
++                size=out_size,
+                 mode=self.mode,
+                 align_corners=self.align_corners)
+ 
+@@ -1199,9 +1200,9 @@
+         if self.out_size is not None:
+             return self.out_size
+         if self.up:
+-            return tuple(s * self.scale_factor for s in x.shape[2:])
++            return tuple(int(s * self.scale_factor) for s in x.shape[2:])
+         else:
+-            return tuple(s // self.scale_factor for s in x.shape[2:])
++            return tuple(int(s // self.scale_factor) for s in x.shape[2:])
+ 
+     def __repr__(self):
+         s = '{name}(scale_factor={scale_factor}, out_size={out_size}, mode={mode}, align_corners={align_corners}, up={up})' # noqa
+diff -x .git -x .gitignore -r -N -r -u ./pytorch/pytorchcv/models/deeplabv3.py esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/deeplabv3.py
+--- ./pytorch/pytorchcv/models/deeplabv3.py	2020-12-06 10:53:31.000000000 +0100
++++ esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/deeplabv3.py	2020-12-04 17:56:52.000000000 +0100
+@@ -50,7 +50,8 @@
+         x = self.conv1(x)
+         x = self.dropout(x)
+         x = self.conv2(x)
+-        x = F.interpolate(x, size=out_size, mode="bilinear", align_corners=True)
++        x = F.interpolate(x, size=out_size, mode="bilinear",
++                          align_corners=False)
+         return x
+ 
+ 
+@@ -83,7 +84,7 @@
+         in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
+         x = self.pool(x)
+         x = self.conv(x)
+-        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=True)
++        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=False)
+         return x
+ 
+ 
+diff -x .git -x .gitignore -r -N -r -u ./pytorch/pytorchcv/models/pspnet.py esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/pspnet.py
+--- ./pytorch/pytorchcv/models/pspnet.py	2020-12-06 10:53:31.000000000 +0100
++++ esanet/src/models/external_code/imgclsmob/pytorch/pytorchcv/models/pspnet.py	2020-12-04 17:56:52.000000000 +0100
+@@ -48,7 +48,8 @@
+         x = self.conv1(x)
+         x = self.dropout(x)
+         x = self.conv2(x)
+-        x = F.interpolate(x, size=out_size, mode="bilinear", align_corners=True)
++        x = F.interpolate(x, size=out_size, mode="bilinear",
++                          align_corners=False)
+         return x
+ 
+ 
+@@ -84,7 +85,7 @@
+         in_size = self.upscale_out_size if self.upscale_out_size is not None else x.shape[2:]
+         x = self.pool(x)
+         x = self.conv(x)
+-        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=True)
++        x = F.interpolate(x, size=in_size, mode="bilinear", align_corners=False)
+         return x
+ 
+ 

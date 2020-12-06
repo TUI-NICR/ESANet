@@ -1,0 +1,132 @@
+syntax = "proto2";
+
+package scenenet;
+
+message SceneLayout {
+    enum LayoutType {
+        BATHROOM = 1;
+        BEDROOM = 2;
+        KITCHEN = 3;
+        LIVING_ROOM = 4;
+        OFFICE = 5;
+    }
+    optional LayoutType layout_type = 1;
+    // This is the name of the SceneNet model used for the layout
+    optional string model = 2;
+}
+
+message LightInfo {
+    enum LightType {
+        SPHERE = 1;
+        PARALLELOGRAM = 2;
+    }
+    optional LightType light_type = 1;
+    // Light intensity
+    optional Power light_output = 2;
+    // This is the center for sphere type lights. And corner for others
+    optional Position position = 3;
+    // This is only for SPHERE lights
+    optional float radius = 4;
+    // This is only for PARALLELOGRAM lights
+    optional Position v1 = 5;
+    optional Position v2 = 6;
+}
+
+message RandomObjectInfo {
+    optional string shapenet_hash = 1;
+    optional float height_meters = 2;
+    message Transformation {
+        // The 3x4 matrix is as follows:
+        // rotation_mat11 rotation_mat12 rotation_mat13 translation_x
+        // rotation_mat21 rotation_mat22 rotation_mat23 translation_y
+        // rotation_mat31 rotation_mat32 rotation_mat33 translation_y
+        optional float translation_x = 1;
+        optional float translation_y = 2;
+        optional float translation_z = 3;
+        optional float rotation_mat11 = 4;
+        optional float rotation_mat12 = 5;
+        optional float rotation_mat13 = 6;
+        optional float rotation_mat21 = 7;
+        optional float rotation_mat22 = 8;
+        optional float rotation_mat23 = 9;
+        optional float rotation_mat31 = 10;
+        optional float rotation_mat32 = 11;
+        optional float rotation_mat33 = 12;
+    }
+    // The transformation gives the transformation applies to an object, about
+    // the center of the base plane of its axis-aligned bounding box.
+    optional Transformation object_pose = 3;
+}
+
+message Instance {
+    optional int32 instance_id = 1;
+    optional string semantic_wordnet_id = 2;
+    optional string semantic_english = 3;
+    enum InstanceType {
+        // This is the instance type when no object is present, e.g. because of
+        // looking out a window into nothingness
+        BACKGROUND = 1;
+        // This is an object that is hard coded into the layout and does not
+        // move.  This type does not have a transformation or shapenet hash
+        LAYOUT_OBJECT = 2;
+        // This is a randomly positioned light source
+        LIGHT_OBJECT = 3;
+        // This means the object is a randomly positioned shapenet object. The
+        // object has a transformation and scale parameter in the object_info
+        // variable.
+        RANDOM_OBJECT = 4;
+    }
+    optional InstanceType instance_type = 4;
+    // This information is only filled in for the respective type
+    optional LightInfo light_info = 5;
+    optional RandomObjectInfo object_info = 6;
+}
+
+message Power {
+    optional float r = 1;
+    optional float g = 2;
+    optional float b = 3;
+}
+
+message Position {
+    optional float x = 1;
+    optional float y = 2;
+    optional float z = 3;
+}
+
+message Pose {
+    // The position of these two points define the camera view. The y vector is
+    // defined as [0,1,0].  For an example of how to calculate the camera view
+    // coordinate system, see the python codebase.
+    optional Position camera = 1;
+    optional Position lookat = 2;
+    optional float timestamp = 3;
+}
+
+message View {
+    // These increment by the number of skip frames, i.e. 0,25,50...7475.
+    optional int32 frame_num = 1;
+    // The photo is rendered by integrating uniformly sampled 
+    // exposures between the following two poses
+    optional Pose shutter_open = 2;
+    optional Pose shutter_close = 3;
+}
+
+message Trajectory {
+    optional SceneLayout layout = 1;
+    // The first instances[0] is always the 'background' and
+    // undefined class when for example looking out windows
+    repeated Instance instances = 2;
+    // These are ordered sequentially for a trajectory
+    repeated View views = 3;
+    // This stores the path from the root data directory to the trajectory data
+    // folder.  If the trajectories are stored as:
+    // /path/i/extracted/{val/train}/0/123/photo/0.jpg 
+    // then this path will be '0/123' designating the trajectories folder
+    optional string render_path = 4;
+}
+
+message Trajectories {
+    // This is the root list which stores all of the available trajectories
+    repeated Trajectory trajectories = 1;
+}

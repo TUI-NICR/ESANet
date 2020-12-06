@@ -1,0 +1,279 @@
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/SA-Gate.nyu/net_util.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/net_util.py
+--- ./model/SA-Gate.nyu/net_util.py	2020-12-06 00:00:14.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/net_util.py	2020-12-04 17:56:52.000000000 +0100
+@@ -28,7 +28,10 @@
+ 
+     def forward(self, x):
+         b, c, _, _ = x.size()
+-        y = self.avg_pool(x).view(b, c)
++        b = int(b)
++        c = int(c)
++        y = nn.functional.adaptive_avg_pool2d(x, 2)
++        y = nn.functional.adaptive_avg_pool2d(y, 1).view(b, c)
+         y = self.fc(y).view(b, self.out_planes, 1, 1)
+         return y
+ 
+@@ -88,4 +91,4 @@
+         rgb_out = self.relu1(rgb_out)
+         hha_out = self.relu2(hha_out)
+ 
+-        return [rgb_out, hha_out], merge_feature
+\ No newline at end of file
++        return [rgb_out, hha_out], merge_feature
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/SA-Gate.nyu/network.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/network.py
+--- ./model/SA-Gate.nyu/network.py	2020-12-06 00:00:14.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/network.py	2020-12-04 17:56:52.000000000 +0100
+@@ -7,7 +7,7 @@
+ from functools import partial
+ from collections import OrderedDict
+ from config import config
+-from dual_resnet import resnet101
++from dual_resnet import resnet50
+ 
+ class _FCNHead(nn.Module):
+     def __init__(self, in_channels, channels, norm_layer=nn.BatchNorm2d, bn_momentum=0.003):
+@@ -27,7 +27,7 @@
+ class DeepLab(nn.Module):
+     def __init__(self, out_planes, criterion, norm_layer, pretrained_model=None):
+         super(DeepLab, self).__init__()
+-        self.backbone = resnet101(pretrained_model, norm_layer=norm_layer,
++        self.backbone = resnet50(pretrained_model, norm_layer=norm_layer,
+                                 bn_eps=config.bn_eps,
+                                 bn_momentum=config.bn_momentum,
+                                 deep_stem=True, stem_width=64)
+@@ -48,8 +48,10 @@
+         b, c, h, w = data.shape
+         blocks, merges = self.backbone(data, hha)
+         pred, aux_fm = self.head(merges)
+-        pred = F.interpolate(pred, size=(h, w), mode='bilinear', align_corners=True)
+-        aux_fm = F.interpolate(aux_fm, size=(h, w), mode='bilinear',  align_corners=True)
++        pred = F.interpolate(pred, size=(int(h), int(w)), mode='bilinear',
++                             align_corners=False)
++        aux_fm = F.interpolate(aux_fm, size=(int(h), int(w)), mode='bilinear',
++                               align_corners=False)
+ 
+         if label is not None:       # training
+             loss = self.criterion(pred, label)
+@@ -121,7 +123,7 @@
+ 
+         pool = self.pool_red_conv(pool)
+         if self.training or self.pooling_size is None:
+-            pool = pool.repeat(1, 1, x.size(2), x.size(3))
++            pool = pool.repeat(1, 1, int(x.size(2)), int(x.size(3)))
+ 
+         out += pool
+         out = self.red_bn(out)
+@@ -129,21 +131,23 @@
+         return out
+ 
+     def _global_pooling(self, x):
+-        if self.training or self.pooling_size is None:
+-            pool = x.view(x.size(0), x.size(1), -1).mean(dim=-1)
+-            pool = pool.view(x.size(0), x.size(1), 1, 1)
+-        else:
+-            pooling_size = (min(try_index(self.pooling_size, 0), x.shape[2]),
+-                            min(try_index(self.pooling_size, 1), x.shape[3]))
+-            padding = (
+-                (pooling_size[1] - 1) // 2,
+-                (pooling_size[1] - 1) // 2 if pooling_size[1] % 2 == 1 else (pooling_size[1] - 1) // 2 + 1,
+-                (pooling_size[0] - 1) // 2,
+-                (pooling_size[0] - 1) // 2 if pooling_size[0] % 2 == 1 else (pooling_size[0] - 1) // 2 + 1
+-            )
+-
+-            pool = nn.functional.avg_pool2d(x, pooling_size, stride=1)
+-            pool = nn.functional.pad(pool, pad=padding, mode="replicate")
++        pool = nn.functional.adaptive_avg_pool2d(x, 2)
++        pool = nn.functional.adaptive_avg_pool2d(pool, 1)
++        # if self.training or self.pooling_size is None:
++        #     pool = x.view(int(x.size(0)), int(x.size(1)), -1).mean(dim=-1)
++        #     pool = pool.view(int(x.size(0)), int(x.size(1)), 1, 1)
++        # else:
++            # pooling_size = (min(try_index(self.pooling_size, 0), x.shape[2]),
++            #                 min(try_index(self.pooling_size, 1), x.shape[3]))
++            # padding = (
++            #     (pooling_size[1] - 1) // 2,
++            #     (pooling_size[1] - 1) // 2 if pooling_size[1] % 2 == 1 else (pooling_size[1] - 1) // 2 + 1,
++            #     (pooling_size[0] - 1) // 2,
++            #     (pooling_size[0] - 1) // 2 if pooling_size[0] % 2 == 1 else (pooling_size[0] - 1) // 2 + 1
++            # )
++            #
++            # pool = nn.functional.avg_pool2d(x, pooling_size, stride=1)
++            # pool = nn.functional.pad(pool, pad=padding, mode="replicate")
+         return pool
+ 
+ class Head(nn.Module):
+@@ -179,10 +183,11 @@
+         f = self.aspp(f)
+ 
+         low_level_features = f_list[0]
+-        low_h, low_w = low_level_features.size(2), low_level_features.size(3)
++        low_h = int(low_level_features.size(2))
++        low_w = int(low_level_features.size(3))
+         low_level_features = self.reduce(low_level_features)
+ 
+-        f = F.interpolate(f, size=(low_h, low_w), mode='bilinear', align_corners=True)
++        f = F.interpolate(f, size=(low_h, low_w), mode='bilinear', align_corners=False)
+         f = torch.cat((f, low_level_features), dim=1)
+         f = self.last_conv(f)
+ 
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/SA-Gate.nyu/to_onnx.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/to_onnx.py
+--- ./model/SA-Gate.nyu/to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/SA-Gate.nyu/to_onnx.py	2020-12-04 17:56:52.000000000 +0100
+@@ -0,0 +1,33 @@
++from torch import nn
++import os
++import torch
++
++from network import DeepLab
++
++
++def to_onnx(n_classes, h, w, outname):
++    criterion = nn.CrossEntropyLoss(reduction='mean', ignore_index=255)
++    model = DeepLab(n_classes, criterion=criterion, norm_layer=nn.BatchNorm2d)
++    model.eval()
++
++    rgb = torch.rand(size=(1, 3, h, w), dtype=torch.float32)
++    hha = torch.rand(size=(1, 3, h, w), dtype=torch.float32)
++
++    out_dir = '../../../onnx_models'
++    os.makedirs(out_dir, exist_ok=True)
++    onnx_file_path = os.path.join(out_dir, outname)
++    torch.onnx.export(model,
++                      (rgb, hha),
++                      onnx_file_path,
++                      export_params=True,
++                      input_names=['rgb', 'hha'],
++                      output_names=['output'],
++                      do_constant_folding=True,
++                      verbose=False,
++                      opset_version=10
++                      )
++    print(f'exported {onnx_file_path}')
++
++
++to_onnx(n_classes=40, h=480, w=640, outname='sa_gate_nyuv2.onnx')
++to_onnx(n_classes=19, h=1024, w=2048, outname='sa_gate_cityscapes.onnx')
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/malleable2_5d.nyu.res101/config.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/config.py
+--- ./model/malleable2_5d.nyu.res101/config.py	2020-12-06 00:00:14.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/config.py	2020-12-04 17:56:52.000000000 +0100
+@@ -76,7 +76,7 @@
+ C.fix_bias = True
+ C.bn_eps = 1e-5
+ C.bn_momentum = 0.01
+-C.pretrained_model = C.volna + 'DATA/pytorch-weight/resnet101_v1c.pth'
++# C.pretrained_model = C.volna + 'DATA/pytorch-weight/resnet101_v1c.pth'
+ 
+ """Train Config"""
+ C.lr = 2e-2
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/malleable2_5d.nyu.res101/network.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/network.py
+--- ./model/malleable2_5d.nyu.res101/network.py	2020-12-06 00:00:14.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/network.py	2020-12-04 17:56:52.000000000 +0100
+@@ -3,6 +3,7 @@
+ import torch
+ import torch.nn as nn
+ import torch.nn.functional as F
++import numpy as np
+ 
+ from functools import partial
+ from collections import OrderedDict
+@@ -61,7 +62,22 @@
+         self.business_layer.append(self.aspp)
+         self.criterion = criterion
+ 
+-    def forward(self, data, depth, coordinate, camera_params, label=None):
++        camera_params = dict()
++        camera_params['intrinsic'] = {}
++        camera_params['intrinsic']['fx'] = 5.1885790117450188e+02
++        camera_params['intrinsic']['fy'] = 5.1946961112127485e+02
++        camera_params['intrinsic']['cx'] = 3.2558244941119034e+02
++        camera_params['intrinsic']['cy'] = 2.5373616633400465e+02
++
++        for k1 in camera_params:
++            for k2 in camera_params[k1]:
++                camera_params[k1][k2] = torch.from_numpy(np.array(camera_params[k1][k2], dtype=np.float32)).float()
++        self.camera_params = camera_params
++
++    def forward(self, data, depth, coordinate=None, camera_params=None, label=None):
++        if camera_params is None:
++            camera_params = self.camera_params
++
+         blocks = self.backbone(data, depth, camera_params, coordinate)
+         feat = blocks[-1]
+         feat = F.interpolate(feat, scale_factor=2, mode='bilinear')
+@@ -70,7 +86,7 @@
+         feat = self.task_module(feat)
+         feat_8x_2 = self.embed(feat)
+         depth_8x = F.interpolate(depth, scale_factor=1/8, mode='bilinear')
+-        coord_8x = F.interpolate(coordinate, scale_factor = 1/8, mode = 'nearest')
++        # coord_8x = F.interpolate(coordinate, scale_factor = 1/8, mode = 'nearest')
+         feat = self.aspp(feat_8x_2)
+ 
+         feat = F.interpolate(feat, scale_factor=2, mode='bilinear')
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/malleable2_5d.nyu.res101/resnet.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/resnet.py
+--- ./model/malleable2_5d.nyu.res101/resnet.py	2020-12-06 00:00:14.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/resnet.py	2020-12-04 17:56:52.000000000 +0100
+@@ -284,22 +284,24 @@
+         x = self.relu(x)
+         x = self.maxpool(x)
+ 
++        current_coord = coord
++
+         blocks = []
+         current_depth = F.interpolate(depth, scale_factor=1 / 4, mode='nearest')
+-        current_coord = F.interpolate(coord, scale_factor=1 / 4, mode='nearest')
++        # current_coord = F.interpolate(coord, scale_factor=1 / 4, mode='nearest')
+         x = self.layer1(x, current_depth, camera_params, current_coord);
+         blocks.append(x)
+         current_depth = F.interpolate(depth, scale_factor=1 / 4, mode='nearest')
+-        current_coord = F.interpolate(coord, scale_factor=1 / 4, mode='nearest')
++        # current_coord = F.interpolate(coord, scale_factor=1 / 4, mode='nearest')
+         #print(current_depth.shape)
+         x = self.layer2(x, current_depth, camera_params, current_coord);
+         blocks.append(x)
+         current_depth = F.interpolate(depth, scale_factor=1 / 8, mode='nearest')
+-        current_coord = F.interpolate(coord, scale_factor=1 / 8, mode='nearest')
++        # current_coord = F.interpolate(coord, scale_factor=1 / 8, mode='nearest')
+         x = self.layer3(x, current_depth, camera_params, current_coord);
+         blocks.append(x)
+         current_depth = F.interpolate(depth, scale_factor=1 / 16, mode='nearest')
+-        current_coord = F.interpolate(coord, scale_factor=1 / 16, mode='nearest')
++        # current_coord = F.interpolate(coord, scale_factor=1 / 16, mode='nearest')
+         x = self.layer4(x, current_depth, camera_params, current_coord);
+         blocks.append(x)
+ 
+diff -x .git -x .gitignore -x '*.pyc' -x '*.pth' -x '*.png' -x '*.egg*' -x '*.so' -r -N -u ./model/malleable2_5d.nyu.res101/to_onnx.py esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/to_onnx.py
+--- ./model/malleable2_5d.nyu.res101/to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/RGBD_Semantic_Segmentation_PyTorch/model/malleable2_5d.nyu.res101/to_onnx.py	2020-12-04 17:56:52.000000000 +0100
+@@ -0,0 +1,32 @@
++from torch import nn
++import os
++import torch
++
++from network import DeepLab
++
++N_CLASSES = 37
++H = 480
++W = 640
++
++criterion = nn.CrossEntropyLoss(reduction='mean', ignore_index=255)
++model = DeepLab(N_CLASSES, criterion=criterion, norm_layer=nn.BatchNorm2d)
++model.eval()
++
++rgb = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++depth = torch.rand(size=(1, 1, H, W), dtype=torch.float32)
++
++out_dir = '../../../onnx_models'
++os.makedirs(out_dir, exist_ok=True)
++onnx_file_path = os.path.join(out_dir, 'malleable25d.onnx')
++torch.onnx.export(model,
++                  (rgb, depth),
++                  onnx_file_path,
++                  export_params=True,
++                  input_names=['rgb', 'hha'],
++                  output_names=['output'],
++                  do_constant_folding=True,
++                  verbose=False,
++                  opset_version=11
++                  )
++
++# problem im2col not supported

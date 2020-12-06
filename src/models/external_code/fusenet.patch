@@ -1,0 +1,33 @@
+diff -x .git -x .gitignore -r -N -u ./to_onnx.py esanet/src/models/external_code/fusenet-pytorch/to_onnx.py
+--- ./to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/fusenet-pytorch/to_onnx.py	2020-12-04 17:56:52.000000000 +0100
+@@ -0,0 +1,29 @@
++import os
++import torch
++from models import networks
++
++N_CLASSES = 37
++H = 480
++W = 640
++
++model = networks.FusenetGenerator(N_CLASSES)
++model.eval()
++
++rgb = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++depth = torch.rand(size=(1, 1, H, W), dtype=torch.float32)
++
++onnx_file_path = os.path.join('fusenet.onnx')
++
++torch.onnx.export(model,
++                  (rgb, depth),
++                  onnx_file_path,
++                  export_params=True,
++                  input_names=['rgb', 'depth'],
++                  output_names=['output'],
++                  do_constant_folding=True,
++                  verbose=False,
++                  opset_version=11
++                  )
++
++# problem: KeyError: 'max_unpool2d' (apparently not supported by onnx)
++# https://github.com/pytorch/pytorch/issues/25088

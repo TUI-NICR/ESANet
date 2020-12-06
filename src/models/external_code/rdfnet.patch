@@ -1,0 +1,144 @@
+diff -x .git -x .gitignore -x '*.pyc' -x '*.idea' -x '*.png' -r -N -u ./RDFNet_PyTorch/blocks.py esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/blocks.py
+--- ./RDFNet_PyTorch/blocks.py	2020-12-05 23:48:56.000000000 +0100
++++ esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/blocks.py	2020-12-04 17:56:52.000000000 +0100
+@@ -54,23 +54,24 @@
+     def forward(self, *xs):
+         # print(self.max_size)
+         max_size = self.max_size#xs[-1].size()[-2:]     # max size of these feature, in default situation, the last data in the data-array has the biggest shape
++        max_size = (int(xs[-1].size()[-2]), int(xs[-1].size()[-1]))
+         output = self.resolve0(xs[0])
+-        if xs[0].size()[-2] != max_size[0]:
++        if int(xs[0].size()[-2]) != max_size[0]:
+             output = nn.functional.interpolate(
+                 output,
+                 size=max_size,
+                 mode='bilinear',
+-                align_corners=True)
++                align_corners=False)
+ 
+         for i, x in enumerate(xs[1:], 1):
+             this_feature = self.__getattr__("resolve{}".format(i))(x)
+             # upsamples all (smaller) feature maps to the largest resolution of the inputs
+-            if xs[i].size()[-2] != max_size[0]:
++            if int(xs[i].size()[-2]) != max_size[0]:
+                 this_feature = nn.functional.interpolate(
+                     this_feature,
+                     size=max_size,
+                     mode='bilinear',
+-                    align_corners=True)
++                    align_corners=False)
+             output += this_feature
+ 
+         return output
+diff -x .git -x .gitignore -x '*.pyc' -x '*.idea' -x '*.png' -r -N -u ./RDFNet_PyTorch/rdfnet.py esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/rdfnet.py
+--- ./RDFNet_PyTorch/rdfnet.py	2020-12-05 23:48:56.000000000 +0100
++++ esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/rdfnet.py	2020-12-04 17:56:52.000000000 +0100
+@@ -1,3 +1,4 @@
++import os
+ import torch.nn as nn
+ import math
+ import torch.utils.model_zoo as model_zoo
+@@ -11,10 +12,10 @@
+ BatchNorm2d = nn.BatchNorm2d
+ 
+ class RDF(nn.Module):
+-    def __init__(self, input_size, num_classes, bn_momentum=0.0003, features=256, pretained=False, model_path=''):
++    def __init__(self, input_size, num_classes, layers, bn_momentum=0.0003, features=256, pretained=False, model_path=''):
+         super(RDF, self).__init__()
+-        self.Resnet101rgb = get_resnet101(bn_momentum=bn_momentum)
+-        self.Resnet101hha = get_resnet101(bn_momentum=bn_momentum)
++        self.Resnet101rgb = get_resnet101(layers=layers, bn_momentum=bn_momentum)
++        self.Resnet101hha = get_resnet101(layers=layers, bn_momentum=bn_momentum)
+ 
+         # This is the four stages of each resnet.
+         self.rgblayer1 = nn.Sequential(self.Resnet101rgb.conv1, self.Resnet101rgb.bn1, self.Resnet101rgb.relu1,
+@@ -86,7 +87,7 @@
+         fusion3 = self.mmf3(rgb_layer_3, hha_layer_3)
+         fusion4 = self.mmf4(rgb_layer_4, hha_layer_4)
+ 
+-        # print(fusion1.shape, fusion2.shape, fusion3.shape, fusion4.shape)
++        print(fusion1.shape, fusion2.shape, fusion3.shape, fusion4.shape)
+ 
+         # modify the number of channel
+         layer_1_rn = self.layer1_rn(fusion1)
+@@ -99,7 +100,7 @@
+         path_2 = self.refinenet2(path_3, layer_2_rn)
+         path_1 = self.refinenet1(path_2, layer_1_rn)
+         out = self.output_conv(path_1)
+-        out = nn.functional.interpolate(out, size=rgb.size()[-2:], mode='bilinear', align_corners=True)
++        out = nn.functional.interpolate(out, size=(int(rgb.size()[-2]), int(rgb.size()[-1])), mode='bilinear', align_corners=False)
+ 
+         return out
+ 
+@@ -112,5 +113,6 @@
+     out = net(left, right)
+     print(out.shape)
+ 
++
+ if __name__ == '__main__':
+-    main()
+\ No newline at end of file
++    main()
+diff -x .git -x .gitignore -x '*.pyc' -x '*.idea' -x '*.png' -r -N -u ./RDFNet_PyTorch/resnet101.py esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/resnet101.py
+--- ./RDFNet_PyTorch/resnet101.py	2020-12-05 23:48:56.000000000 +0100
++++ esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/resnet101.py	2020-12-04 17:56:52.000000000 +0100
+@@ -112,12 +112,10 @@
+             return x
+ 
+ 
+-def get_resnet101(dilation=[1,1,1,1], bn_momentum=0.0003, is_fpn=False):
+-    model = ResNet(Bottleneck, [3, 4, 23, 3], dilation=dilation, bn_momentum=bn_momentum, is_fpn=is_fpn)
++def get_resnet101(dilation=(1, 1, 1, 1), layers=(3, 4, 23, 3), bn_momentum=0.0003, is_fpn=False):
++    model = ResNet(Bottleneck, layers, dilation=dilation, bn_momentum=bn_momentum, is_fpn=is_fpn)
+     return model
+ 
+-
+-
+ if __name__ == '__main__':
+     net = get_resnet101()
+     x = torch.randn(4,3,128,128)
+diff -x .git -x .gitignore -x '*.pyc' -x '*.idea' -x '*.png' -r -N -u ./RDFNet_PyTorch/to_onnx.py esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/to_onnx.py
+--- ./RDFNet_PyTorch/to_onnx.py	1970-01-01 01:00:00.000000000 +0100
++++ esanet/src/models/external_code/PyTorch_Semantic_Segmentation/RDFNet_PyTorch/to_onnx.py	2020-12-05 23:52:07.000000000 +0100
+@@ -0,0 +1,41 @@
++import os
++
++import torch
++
++from rdfnet import RDF
++
++
++if __name__ == '__main__':
++
++    H = 480
++    W = 640
++    N_CLASSES = 40
++    IT_DOES_NOT_MATTER = -1
++
++    rgb = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++    depth = torch.rand(size=(1, 3, H, W), dtype=torch.float32)
++
++    for layers, n in zip([(3, 8, 36, 3), (3, 4, 23, 3), (3, 4, 6, 3)],
++                         ['152', '101', '50']):
++        # create model
++        net = RDF(input_size=IT_DOES_NOT_MATTER,
++                  layers=layers,
++                  num_classes=N_CLASSES)
++
++        # export model
++        net.eval()
++        out = net(rgb, depth)
++
++        out_dir = './'
++        onnx_file_path_acnet = os.path.join(out_dir,
++                                            f'rdfnet_{n}_{H}_{W}.onnx')
++        torch.onnx.export(net,
++                          (rgb, depth),
++                          onnx_file_path_acnet,
++                          export_params=True,
++                          input_names=['rgb', 'depth'],
++                          output_names=['output'],
++                          do_constant_folding=True,
++                          verbose=False,
++                          opset_version=10
++        )
