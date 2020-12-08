@@ -97,9 +97,6 @@ def _parse_args():
 
     args = parser.parse_args()
     args.pretrained_on_imagenet = False
-    args.pretrained_rgb_segmentation_ckpt_path = None,
-    args.pretrained_depth_segmentation_ckpt_path = None,
-    args.pretrained_decoder_from_rgb_segmentation = False,
     return args
 
 
