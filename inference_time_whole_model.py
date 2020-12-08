@@ -300,6 +300,7 @@ if __name__ == '__main__':
 
     if args.time_tensorrt:
         import tensorrt as trt
+        import pycuda.autoinit
         import pycuda.driver as cuda
 
         print('TensorRT version:', trt.__version__)
