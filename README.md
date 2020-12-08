@@ -206,7 +206,7 @@ Examples:
     python inference_samples.py \
         --dataset sunrgbd
         --ckpt_path ./trained_models/sunrgbd/r34_NBt1D.pth \
-        --depth_scale 1 \ 
+        --depth_scale 1 \
         --raw_depth
     ```
     ![img](samples/result_sunrgbd.jpg)
@@ -216,7 +216,7 @@ Examples:
     python inference_samples.py \
         --dataset sunrgbd
         --ckpt_path ./trained_models/nyuv2/r34_NBt1D.pth \
-        --depth_scale 0.1 \ 
+        --depth_scale 0.1 \
         --raw_depth
     ```
     ![img](samples/result_nyuv2.jpg)
@@ -245,7 +245,7 @@ Example: To reproduce the timings of our ESANet-R34-NBt1D trained on NYUv2, run:
 python3 inference_time_whole_model.py \
     --dataset nyuv2 \
     --no_time_pytorch \
-    --no_time_onnxruntime \ 
+    --no_time_onnxruntime \
     --trt_floatx 16
 ``` 
 > Note that a Jetpack version earlier than 4.4 fails completely or results in 
