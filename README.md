@@ -22,7 +22,7 @@ The source code and the network weights are published under BSD 3-Clause license
 see [license file](LICENSE) for details. 
 
 If you use the source code or the network weights, please cite the following paper:
->Seichter, D., Möhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
+>Seichter, D., Köhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
 *Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis*
 arXiv preprint arXiv:2011.06961 (2020).
 
