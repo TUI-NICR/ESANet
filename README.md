@@ -1,4 +1,7 @@
 # ESANet: Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-sun-rgbd)](https://paperswithcode.com/sota/semantic-segmentation-on-sun-rgbd?p=efficient-rgb-d-semantic-segmentation-for)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-nyu-depth-v2)](https://paperswithcode.com/sota/semantic-segmentation-on-nyu-depth-v2?p=efficient-rgb-d-semantic-segmentation-for)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-cityscapes)](https://paperswithcode.com/sota/semantic-segmentation-on-cityscapes?p=efficient-rgb-d-semantic-segmentation-for)
 
 This repository contains the code to our paper [Efficient RGB-D Semantic 
 Segmentation for Indoor Scene Analysis](https://arxiv.org/pdf/2011.06961.pdf).
