@@ -88,7 +88,7 @@ Robotics and Automation (ICRA).
    Download and extract the models to `./trained_models`.
    
    *We report the FPS for NVIDIA Jetson AGX Xavier (Jetpack 4.4, TensorRT 7.1, Float16).   
-   **Note that we only reported the inference time for NYUv2 in our paper as it has more classes than NYUv2 than SUNRGB-D. 
+   **Note that we only reported the inference time for NYUv2 in our paper as it has more classes than SUNRGB-D. 
    Thus, the FPS for SUNRGB-D can be slightly higher (37 vs. 40 classes).  
 
 ## Content
