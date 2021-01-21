@@ -184,8 +184,6 @@ class ESANet(nn.Module):
             activation=self.activation,
             nr_decoder_blocks=nr_decoder_blocks,
             encoder_decoder_fusion=encoder_decoder_fusion,
-            height=height,
-            width=width,
             upsampling_mode=upsampling,
             num_classes=num_classes
         )
@@ -250,8 +248,6 @@ class Decoder(nn.Module):
                  activation=nn.ReLU(inplace=True),
                  nr_decoder_blocks=1,
                  encoder_decoder_fusion='add',
-                 height=480,
-                 width=640,
                  upsampling_mode='bilinear',
                  num_classes=37):
         super().__init__()
@@ -262,8 +258,6 @@ class Decoder(nn.Module):
             activation=activation,
             nr_decoder_blocks=nr_decoder_blocks[0],
             encoder_decoder_fusion=encoder_decoder_fusion,
-            height_out=height // 16,
-            width_out=width // 16,
             upsampling_mode=upsampling_mode,
             num_classes=num_classes
         )
@@ -274,8 +268,6 @@ class Decoder(nn.Module):
             activation=activation,
             nr_decoder_blocks=nr_decoder_blocks[1],
             encoder_decoder_fusion=encoder_decoder_fusion,
-            height_out=height // 8,
-            width_out=width // 8,
             upsampling_mode=upsampling_mode,
             num_classes=num_classes
         )
@@ -286,8 +278,6 @@ class Decoder(nn.Module):
             activation=activation,
             nr_decoder_blocks=nr_decoder_blocks[2],
             encoder_decoder_fusion=encoder_decoder_fusion,
-            height_out=height // 4,
-            width_out=width // 4,
             upsampling_mode=upsampling_mode,
             num_classes=num_classes
         )
@@ -325,13 +315,9 @@ class DecoderModule(nn.Module):
                  activation=nn.ReLU(inplace=True),
                  nr_decoder_blocks=1,
                  encoder_decoder_fusion='add',
-                 height_out=30,
-                 width_out=40,
                  upsampling_mode='bilinear',
                  num_classes=37):
         super().__init__()
-        self.height_out = height_out
-        self.width_out = width_out
         self.upsampling_mode = upsampling_mode
         self.encoder_decoder_fusion = encoder_decoder_fusion
 
@@ -430,15 +416,7 @@ def main():
 
     model = ESANet(
         height=height,
-        width=width,
-        channels_decoder=[256, 128, 128],
-        encoder_rgb='resnet18',
-        encoder_depth='resnet18',
-        fuse_depth_in_rgb_encoder='CBAM-add',
-        encoder_decoder_fusion='add',
-        pretrained_on_imagenet=False,
-        activation='swish',
-        upsampling='learned-3x3')
+        width=width)
 
     print(model)
 
