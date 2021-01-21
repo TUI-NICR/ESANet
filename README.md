@@ -207,7 +207,7 @@ Examples:
 - To apply our ESANet-R34-NBt1D trained on SUNRGB-D to the samples, run:
     ```bash
     python inference_samples.py \
-        --dataset sunrgbd
+        --dataset sunrgbd \
         --ckpt_path ./trained_models/sunrgbd/r34_NBt1D.pth \
         --depth_scale 1 \
         --raw_depth
@@ -217,7 +217,7 @@ Examples:
 - To apply our ESANet-R34-NBt1D trained on NYUv2 to the samples, run:
     ```bash
     python inference_samples.py \
-        --dataset sunrgbd
+        --dataset nyuv2 \
         --ckpt_path ./trained_models/nyuv2/r34_NBt1D.pth \
         --depth_scale 0.1 \
         --raw_depth
