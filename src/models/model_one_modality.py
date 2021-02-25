@@ -158,8 +158,6 @@ class ESANetOneModality(nn.Module):
             activation=self.activation,
             nr_decoder_blocks=nr_decoder_blocks,
             encoder_decoder_fusion=encoder_decoder_fusion,
-            height=height,
-            width=width,
             upsampling_mode=upsampling,
             num_classes=num_classes
         )
