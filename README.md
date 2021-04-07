@@ -12,7 +12,7 @@ common initial processing step in a complex system for real-time scene
 analysis on mobile robots:
 
 <div align="center">
-      <a href="https://www.youtube.com/watch?v=iq6O73MPh14"><img src="https://img.youtube.com/vi/iq6O73MPh14/0.jpg" style="width:100%;"></a>
+      <a href="https://youtu.be/-Sopja6UEJg"><img src="https://img.youtube.com/vi/-Sopja6UEJg/0.jpg" style="width:100%;"></a>
       <br>(Click on the image to open Youtube Video)
 </div>
 
@@ -38,7 +38,7 @@ arXiv preprint arXiv:2011.06961 (2020).
 }
 ```
 
-Note that the preprint was submitted to IEEE International Conference on 
+Note that the preprint was accepted to be published in IEEE International Conference on 
 Robotics and Automation (ICRA).
 
 ## Setup
@@ -160,7 +160,7 @@ Examples:
         --width 1024 \
         --raw_depth \
         --context_module appm-1-2-4-8 \
-        --valid_full_res 
+        --valid_full_res
   
     # Camera: camera1 mIoU: 80.09
     # All Cameras, mIoU: 80.09
@@ -295,7 +295,7 @@ valid for SUNRGB-D):
         --context_module ppm \
         --decoder_channels_mode decreasing \
         --fuse_depth_in_rgb_encoder SE-add \
-        --upsampling learned-3x3-zeropad 
+        --upsampling learned-3x3-zeropad
     
     # or use the default arguments
     python train.py \
