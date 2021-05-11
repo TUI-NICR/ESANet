@@ -14,6 +14,15 @@ analysis on mobile robots:
 <div align="center">
       <a href="https://youtu.be/-Sopja6UEJg"><img src="https://img.youtube.com/vi/-Sopja6UEJg/0.jpg" style="width:100%;"></a>
       <br>(Click on the image to open Youtube Video)
+      <br><br>
+</div>
+
+Our approach can also be applied to outdoor scenarios such as Cityscapes:
+
+<div align="center">
+      <a href="https://youtu.be/XbFTGwFyl4Y"><img src="https://img.youtube.com/vi/XbFTGwFyl4Y/0.jpg" style="width:100%;"></a>
+      <br>(Click on the image to open Youtube Video)
+      <br><br>
 </div>
 
 This repository contains the code for training, evaluating our networks. 
