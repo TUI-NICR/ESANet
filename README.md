@@ -240,7 +240,7 @@ We timed the inference on a NVIDIA Jetson AGX Xavier with Jetpack 4.4
 Reproducing the timings on a NVIDIA Jetson AGX Xavier with Jetpack 4.4 further 
 requires:
 - [the PyTorch 1.4.0 wheel](https://nvidia.box.com/shared/static/ncgzus5o23uck9i5oth2n8n06k340l6k.whl) from [NVIDIA Forum](https://forums.developer.nvidia.com/t/pytorch-for-jetson-version-1-7-0-now-available/72048)
-- [the NVIDIA TensorRT Open Source Software](https://github.com/NVIDIA/TensorRT/releases/tag/v6.0.1) (`onnx2trt` is used to convert the onnx model to a TensorRT engine) 
+- [the NVIDIA TensorRT Open Source Software](https://github.com/NVIDIA/TensorRT/releases/tag/7.1.3) (`onnx2trt` is used to convert the onnx model to a TensorRT engine) 
 - the requirements listed in `requirements_jetson.txt`:
     ```bash
     pip3 install -r requirements_jetson.txt --user
