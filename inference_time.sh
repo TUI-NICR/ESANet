@@ -1,7 +1,7 @@
 #!/bin/bash
 set -o xtrace
 
-DEFAULT_PARAMS='--nr_decoder_blocks 3 --upsampling learned-3x3'
+DEFAULT_PARAMS='--nr_decoder_blocks 3 --upsampling learned-3x3-zeropad'
 
 TIME_PYTORCH='--n_runs_warmup 50 --n_runs 50 --no_time_onnxruntime --no_time_tensorrt --debug'
 TIME_TRT32='--n_runs_warmup 50 --n_runs 50 --no_time_onnxruntime --no_time_pytorch --debug'
