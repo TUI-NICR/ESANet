@@ -3,8 +3,8 @@
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-nyu-depth-v2)](https://paperswithcode.com/sota/semantic-segmentation-on-nyu-depth-v2?p=efficient-rgb-d-semantic-segmentation-for)
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-cityscapes)](https://paperswithcode.com/sota/semantic-segmentation-on-cityscapes?p=efficient-rgb-d-semantic-segmentation-for)
 
-This repository contains the code to our paper [Efficient RGB-D Semantic 
-Segmentation for Indoor Scene Analysis](https://arxiv.org/pdf/2011.06961.pdf).
+This repository contains the code to our paper "Efficient RGB-D Semantic 
+Segmentation for Indoor Scene Analysis" ([IEEE Xplore](https://ieeexplore.ieee.org/document/9561675),  [arXiv](https://arxiv.org/pdf/2011.06961.pdf)).
 
 Our carefully designed network architecture enables real-time semantic 
 segmentation on a NVIDIA Jetson AGX Xavier and, thus, is well suited as a 
@@ -36,10 +36,20 @@ see [license file](LICENSE) for details.
 If you use the source code or the network weights, please cite the following paper:
 >Seichter, D., Köhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
 *Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis*
-arXiv preprint arXiv:2011.06961 (2020).
+in IEEE International Conference on Robotics and Automation (ICRA), pp. 13525-13531, 2021.
 
 ```bibtex
-@article{esanet2020,
+@inproceedings{esanet2021icra,
+  title={Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
+  author={Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
+  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
+  year={2021},
+  volume={},
+  number={},
+  pages={13525-13531}
+}
+
+@article{esanet2020arXiv,
   title={Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
   author={Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
   journal={arXiv preprint arXiv:2011.06961},
