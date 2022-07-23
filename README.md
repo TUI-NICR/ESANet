@@ -32,8 +32,7 @@ Furthermore, we provide code for converting the model to ONNX and TensorRT,
 as well as for measuring the inference time. 
 
 ## License and Citations
-The source code and the network weights are published under BSD 3-Clause license, 
-see [license file](LICENSE) for details. 
+The source code is published under BSD 3-Clause license, see [license file](LICENSE) for details. 
 
 If you use the source code or the network weights, please cite the following paper:
 >Seichter, D., Köhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
