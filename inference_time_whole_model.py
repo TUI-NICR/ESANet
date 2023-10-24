@@ -358,8 +358,8 @@ if __name__ == '__main__':
                                           dtype='uint16')
             # preprocess
             sample = preprocessor({'image': img_rgb, 'depth': img_depth})
-            rgb_images.append(sample['image'][None])
-            depth_images.append(sample['depth'][None])
+            rgb_images.append(sample['image'][None].contiguous())
+            depth_images.append(sample['depth'][None].contiguous())
 
     n_classes_without_void = dataset.n_classes_without_void
 
