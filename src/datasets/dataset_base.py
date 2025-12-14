@@ -14,8 +14,7 @@ from torch.utils.data import Dataset
 class DatasetBase(abc.ABC, Dataset):
     def __init__(self):
         self._camera = None
-        self._default_preprocessor = lambda x: x
-        self.preprocessor = self._default_preprocessor
+        self.preprocessor = None
 
     def filter_camera(self, camera):
         assert camera in self.cameras
@@ -45,7 +44,8 @@ class DatasetBase(abc.ABC, Dataset):
             sample['image_orig'] = sample['image'].copy()
             sample['depth_orig'] = sample['depth'].copy().astype('float32')
 
-        sample = self.preprocessor(sample)
+        if self.preprocessor is not None:
+            sample = self.preprocessor(sample)
 
         return sample
 
