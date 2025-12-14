@@ -37,9 +37,15 @@ def download_file(url, output_filepath, display_progressbar=False):
 if __name__ == '__main__':
     # argument parser
     parser = ap.ArgumentParser(
-        description='Prepare SUNRGBD dataset for segmentation.')
+        description='Prepare SUNRGB-D dataset for segmentation.')
     parser.add_argument('output_path', type=str,
                         help='path where to store dataset')
+    parser.add_argument('--toolbox_filepath',
+                        default=None,
+                        help='filepath to to SUNRGBDtoolbox.zip')
+    parser.add_argument('--data_filepath',
+                        default=None,
+                        help='filepath to SUNRGB-D data zip file.')
     args = parser.parse_args()
 
     # expand user
@@ -50,25 +56,38 @@ if __name__ == '__main__':
     toolbox_dir = os.path.join(output_path, 'SUNRGBDtoolbox')
 
     # download and extract data
+    # SUNRGB-D toolbox
     if not os.path.exists(toolbox_dir):
-        zip_file_path = os.path.join(output_path, 'SUNRGBDtoolbox.zip')
-        download_file(DATASET_TOOLBOX_URL, zip_file_path,
-                      display_progressbar=True)
+        if args.toolbox_filepath is not None:
+            # use existing file
+            with ZipFile(args.toolbox_filepath, 'r') as zip_ref:
+                zip_ref.extractall(output_path)
+        else:
+            zip_file_path = os.path.join(output_path, 'SUNRGBDtoolbox.zip')
+            download_file(DATASET_TOOLBOX_URL, zip_file_path,
+                          display_progressbar=True)
+            with ZipFile(zip_file_path, 'r') as zip_ref:
+                zip_ref.extractall(os.path.dirname(zip_file_path))
+            os.remove(zip_file_path)
+
+    # SUNRGB-D data
+    if args.data_filepath is not None:
+        # use existing file
+        print('Extracting images')
+        with ZipFile(args.data_filepath, 'r') as zip_ref:
+            zip_ref.extractall(output_path)
+    else:
+        zip_file_path = os.path.join(output_path, 'SUNRGBD.zip')
+        if not os.path.exists(zip_file_path):
+            download_file(DATASET_URL, zip_file_path,
+                        display_progressbar=True)
+        print('Extracting images')
         with ZipFile(zip_file_path, 'r') as zip_ref:
             zip_ref.extractall(os.path.dirname(zip_file_path))
         os.remove(zip_file_path)
 
-    zip_file_path = os.path.join(output_path, 'SUNRGBD.zip')
-    if not os.path.exists(zip_file_path):
-        download_file(DATASET_URL, zip_file_path,
-                      display_progressbar=True)
-    print('Extract images')
-    with ZipFile(zip_file_path, 'r') as zip_ref:
-        zip_ref.extractall(os.path.dirname(zip_file_path))
-    os.remove(zip_file_path)
-
-    # extract labels from SUNRGBD toolbox
-    print('Extract labels from SUNRGBD toolbox')
+    # extract labels from SUNRGB-D toolbox
+    print('Extracting labels from SUNRGBD toolbox')
     SUNRGBDMeta_dir = os.path.join(toolbox_dir, 'Metadata/SUNRGBDMeta.mat')
     allsplit_dir = os.path.join(toolbox_dir, 'traintestSUNRGBD/allsplit.mat')
     SUNRGBD2Dseg_dir = os.path.join(toolbox_dir, 'Metadata/SUNRGBD2Dseg.mat')
@@ -90,7 +109,7 @@ if __name__ == '__main__':
 
     seglabel = SUNRGBD2Dseg['SUNRGBD2Dseg']['seglabel']
 
-    for i, meta in tqdm(enumerate(SUNRGBDMeta)):
+    for i, meta in enumerate(tqdm(SUNRGBDMeta)):
         meta_dir = '/'.join(meta.rgbpath.split('/')[:-2])
         real_dir = meta_dir.split('/n/fs/sun3d/data/SUNRGBD/')[1]
         depth_bfx_path = os.path.join(real_dir, 'depth_bfx/' + meta.depthname)
