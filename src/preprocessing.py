@@ -122,9 +122,15 @@ class RandomCrop:
         else:
             i = np.random.randint(0, h - self.crop_height)
             j = np.random.randint(0, w - self.crop_width)
-            image = image[i:i + self.crop_height, j:j + self.crop_width, :]
-            depth = depth[i:i + self.crop_height, j:j + self.crop_width]
-            label = label[i:i + self.crop_height, j:j + self.crop_width]
+            image = np.ascontiguousarray(
+                image[i:i + self.crop_height, j:j + self.crop_width, :]
+            )
+            depth = np.ascontiguousarray(
+                depth[i:i + self.crop_height, j:j + self.crop_width]
+            )
+            label = np.ascontiguousarray(
+                label[i:i + self.crop_height, j:j + self.crop_width]
+            )
             sample['image'] = image
             sample['depth'] = depth
             sample['label'] = label
