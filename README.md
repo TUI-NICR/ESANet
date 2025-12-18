@@ -121,7 +121,7 @@ The dissertation is written in German, but it can certainly be translated automa
     ```
 
     Original environment from paper - go back to
-    [49d2201](https://github.com/TUI-NICR/ESANet/commit/49d220196f3d27a7949772d543111694b9ca3b16) and run:
+    [49d2201](https://github.com/TUI-NICR/ESANet/tree/49d220196f3d27a7949772d543111694b9ca3b16) and run:
    
     ```bash
     conda env create -f rgbd_segmentation.yaml
