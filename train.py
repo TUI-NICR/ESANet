@@ -504,7 +504,7 @@ def validate(model, valid_loader, device, cameras, metrics,
         logs[f'loss_{valid_split}_unweighted'] = \
             loss_function_valid_unweighted.compute_whole_loss()
 
-    logs[f'mIoU_{valid_split}'] = miou['all']
+    logs[f'mIoU_{valid_split}'] = miou['all'].item()
     for camera in cameras:
         logs[f'mIoU_{valid_split}_{camera}'] = miou[camera].item()
 
