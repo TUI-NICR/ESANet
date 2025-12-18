@@ -189,3 +189,9 @@ def get_best_checkpoint(ckpt_dir, key='mIoU_test'):
         f'There is no weights file named {ckpt_path}'
     print(f'Best mIoU: {100*miou:0.2f} at epoch: {epoch}')
     return ckpt_path
+
+
+def is_mps_available() -> bool:
+    if not hasattr(torch, 'backends') or not hasattr(torch.backends, 'mps'):
+        return False
+    return torch.backends.mps.is_available()

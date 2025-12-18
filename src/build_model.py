@@ -11,6 +11,7 @@ from torch import nn
 from src.models.model import ESANet
 from src.models.model_one_modality import ESANetOneModality
 from src.models.resnet import ResNet
+from .utils import is_mps_available
 
 
 def build_model(args, n_classes):
@@ -89,7 +90,7 @@ def build_model(args, n_classes):
 
     if torch.cuda.is_available():
         device = torch.device("cuda:0")
-    elif torch.backends.mps.is_available():
+    elif is_mps_available():
         device = torch.device("mps")
     else:
         device = torch.device("cpu")
