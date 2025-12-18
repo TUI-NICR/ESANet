@@ -3,9 +3,9 @@
 > 🔥 2025-12-18: updated to keep it working in 2025+ (see full changelog below)
 
 > 🔥 You may also want to have a look at our follow-up works:  
-• [EMSANet](https://github.com/TUI-NICR/EMSANet) [IJCNN 2022] and [EMSFormer](https://github.com/TUI-NICR/EMSFormer) [IJCNN 2023] (multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base)  
-• [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] (efficient prediction of dense visual embeddings instead of fixed semantic classes for scene enhanced understanding)  
-• [SemanticNDT](https://github.com/TUI-NICR/semantic-mapping) [ICRA 2022] and [PanopticNDT](https://github.com/TUI-NICR/panoptic-mapping) [IROS 2023] (downstream application for semantic/panoptic mapping).
+• [EMSANet](https://github.com/TUI-NICR/EMSANet) [IJCNN 2022] and [EMSFormer](https://github.com/TUI-NICR/EMSFormer) [IJCNN 2023] – multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base  
+• [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] – efficient prediction of dense visual embeddings instead of fixed semantic classes for scene enhanced understanding  
+• [SemanticNDT](https://github.com/TUI-NICR/semantic-mapping) [ICRA 2022] and [PanopticNDT](https://github.com/TUI-NICR/panoptic-mapping) [IROS 2023] – downstream application for semantic/panoptic mapping.
 
 This repository contains the code to our paper "Efficient RGB-D Semantic 
 Segmentation for Indoor Scene Analysis" ([IEEE Xplore](https://ieeexplore.ieee.org/document/9561675),  [arXiv](https://arxiv.org/pdf/2011.06961.pdf)).
@@ -68,7 +68,7 @@ Robotics and Automation (ICRA).
 
 </details>
 
-This work is also embedded in a broader research framework that is described in the corresponding PhD thesis.
+This work is also embedded in a broader research framework that is described in the corresponding PhD thesis:
 
 > Seichter, D. *Szenen- und Umgebungsanalyse in der mobilen Assistenzrobotik*, Ilmenau, Germany, 2025,
   DOI: [10.22032/dbt.64081](https://doi.org/10.22032/dbt.64081).
