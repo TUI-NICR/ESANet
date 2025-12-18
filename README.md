@@ -120,15 +120,16 @@ The dissertation is written in German, but it can certainly be translated automa
     python -m pip install cityscapesScripts
     ```
 
-    Original environment from paper
-    (go back to 49d220196f3d27a7949772d543111694b9ca3b16):
+    Original environment from paper - go back to
+    [49d2201](https://github.com/TUI-NICR/ESANet/commit/49d220196f3d27a7949772d543111694b9ca3b16) and run:
+   
     ```bash
     conda env create -f rgbd_segmentation.yaml
 
     conda activate rgbd_segmentation
     ```
 
-3. Data preparation (training / evaluation / dataset inference):  
+4. Data preparation (training / evaluation / dataset inference):  
     We trained our networks on 
     [NYUv2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html), 
     [SUNRGB-D](https://rgbd.cs.princeton.edu/), and 
@@ -143,7 +144,7 @@ The dissertation is written in German, but it can certainly be translated automa
     the created datasets in `./datasets`.
     For ImageNet, we used [TensorFlowDatasets](https://www.tensorflow.org/datasets/catalog/imagenet2012) (see `imagenet_pretraining.py`).
 
-4. Pretrained models (evaluation):  
+5. Pretrained models (evaluation):  
     We provide the weights for our selected ESANet-R34-NBt1D (with ResNet34 NBt1D backbones) on NYUv2, SunRGBD, and Cityscapes:
    
     | Dataset                 | Model                            | mIoU  | FPS*     | URL  |
