@@ -13,12 +13,18 @@ For more details, see: [SUNRGB-D dataset](https://rgbd.cs.princeton.edu/)
 
 1. Install requirements:
 ```bash
-pip install -r ./requirements.txt [--user]
+python -m pip install -r ./requirements.txt
 ```
 
 2. Convert dataset:
 ```bash
+# cd to this directory and run:
 python prepare_dataset.py ../../../datasets/sunrgbd
+
+# if you already downloaded the files manually, use:
+python prepare_dataset.py ../../../datasets/sunrgbd \
+    --toolbox_filepath /path/to/SUNRGBDtoolbox.zip \
+    --data_filepath /path/to/SUNRGBD_data.zip
 ```
 
 ## Use dataset

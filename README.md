@@ -1,9 +1,11 @@
 # ESANet: Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-sun-rgbd)](https://paperswithcode.com/sota/semantic-segmentation-on-sun-rgbd?p=efficient-rgb-d-semantic-segmentation-for)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-nyu-depth-v2)](https://paperswithcode.com/sota/semantic-segmentation-on-nyu-depth-v2?p=efficient-rgb-d-semantic-segmentation-for)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/efficient-rgb-d-semantic-segmentation-for/semantic-segmentation-on-cityscapes)](https://paperswithcode.com/sota/semantic-segmentation-on-cityscapes?p=efficient-rgb-d-semantic-segmentation-for)
 
-> You may also want to have a look at our follow-up work [EMSANet](https://github.com/TUI-NICR/EMSANet) (multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base)
+> 🔥 2025-12-18: updated to keep it working in 2025+ (see full changelog below)
+
+> 🔥 You may also want to have a look at our follow-up works:  
+• [EMSANet](https://github.com/TUI-NICR/EMSANet) [IJCNN 2022] and [EMSFormer](https://github.com/TUI-NICR/EMSFormer) [IJCNN 2023] – multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base  
+• [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] – efficient prediction of dense visual embeddings instead of fixed semantic classes for scene enhanced understanding  
+• [SemanticNDT](https://github.com/TUI-NICR/semantic-mapping) [ICRA 2022] and [PanopticNDT](https://github.com/TUI-NICR/panoptic-mapping) [IROS 2023] – downstream application for semantic/panoptic mapping.
 
 This repository contains the code to our paper "Efficient RGB-D Semantic 
 Segmentation for Indoor Scene Analysis" ([IEEE Xplore](https://ieeexplore.ieee.org/document/9561675),  [arXiv](https://arxiv.org/pdf/2011.06961.pdf)).
@@ -14,7 +16,7 @@ common initial processing step in a complex system for real-time scene
 analysis on mobile robots:
 
 <div align="center">
-      <a href="https://youtu.be/-Sopja6UEJg"><img src="https://img.youtube.com/vi/-Sopja6UEJg/0.jpg" style="width:100%;"></a>
+      <a href="https://youtu.be/-Sopja6UEJg"><img src="https://img.youtube.com/vi/-Sopja6UEJg/0.jpg" style="width:75%;"></a>
       <br>(Click on the image to open Youtube Video)
       <br><br>
 </div>
@@ -22,7 +24,7 @@ analysis on mobile robots:
 Our approach can also be applied to outdoor scenarios such as Cityscapes:
 
 <div align="center">
-      <a href="https://youtu.be/XbFTGwFyl4Y"><img src="https://img.youtube.com/vi/XbFTGwFyl4Y/0.jpg" style="width:100%;"></a>
+      <a href="https://youtu.be/XbFTGwFyl4Y"><img src="https://img.youtube.com/vi/XbFTGwFyl4Y/0.jpg" style="width:75%;"></a>
       <br>(Click on the image to open Youtube Video)
       <br><br>
 </div>
@@ -32,34 +34,63 @@ Furthermore, we provide code for converting the model to ONNX and TensorRT,
 as well as for measuring the inference time. 
 
 ## License and Citations
-The source code is published under BSD 3-Clause license, see [license file](LICENSE) for details. 
+The source code is published under Apache 2.0 license, see [license file](LICENSE) for details. 
 
 If you use the source code or the network weights, please cite the following paper:
->Seichter, D., Köhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
+> Seichter, D., Köhler, M., Lewandowski, B., Wengefeld T., Gross, H.-M.
 *Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis*
 in IEEE International Conference on Robotics and Automation (ICRA), pp. 13525-13531, 2021.
 
+<details>
+<summary>BibTeX</summary>
+
 ```bibtex
 @inproceedings{esanet2021icra,
-  title={Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
-  author={Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
-  booktitle={IEEE International Conference on Robotics and Automation (ICRA)},
-  year={2021},
-  volume={},
-  number={},
-  pages={13525-13531}
+  title     = {Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
+  author    = {Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
+  year      = {2021},
+  volume    = {},
+  number    = {},
+  pages     = {13525-13531}
 }
 
 @article{esanet2020arXiv,
-  title={Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
-  author={Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
-  journal={arXiv preprint arXiv:2011.06961},
-  year={2020}
+  title     = {Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis},
+  author    = {Seichter, Daniel and K{\"o}hler, Mona and Lewandowski, Benjamin and Wengefeld, Tim and Gross, Horst-Michael},
+  journal   = {arXiv preprint arXiv:2011.06961},
+  year      = {2020}
 }
 ```
 
 Note that the preprint was accepted to be published in IEEE International Conference on 
 Robotics and Automation (ICRA).
+
+</details>
+
+This work is also embedded in a broader research framework that is described in the corresponding PhD thesis:
+
+> Seichter, D. *Szenen- und Umgebungsanalyse in der mobilen Assistenzrobotik*, Ilmenau, Germany, 2025,
+  DOI: [10.22032/dbt.64081](https://doi.org/10.22032/dbt.64081).
+
+The dissertation is written in German, but it can certainly be translated automatically. 😉
+
+<details>
+<summary>BibTeX</summary>
+
+```bibtex
+@phdthesis{seichter2025phd,
+  author    = {Seichter, Daniel},
+  title     = {Szenen- und Umgebungsanalyse in der mobilen Assistenzrobotik},
+  year      = {2025},
+  note      = {Dissertation, Technische Universit{\"a}t Ilmenau, 2024},
+  doi       = {10.22032/dbt.64081},
+  url       = {https://doi.org/10.22032/dbt.64081},
+  language  = {de}
+}
+```
+
+</details>
 
 ## Setup
 
@@ -70,15 +101,35 @@ Robotics and Automation (ICRA).
     cd /path/to/this/repository
     ```
 
-2. Set up anaconda environment including all dependencies:
+2. Set up anaconda environment including all dependencies:  
+    Updated environment from 2025 (Python 3.12, PyTorch 2.9.1, no TensorFlow and PyTorch Ignite anymore):
     ```bash
-    # create conda environment from YAML file
+    conda env create -f env_esanet2025_mac.yaml  # macos with mps
+    conda env create -f env_esanet2025.yaml   # linux with cuda
+
+    conda activate esanet2025
+    ```
+    
+    Create your own conda environment:
+    ```bash
+    conda create --name "esanet2025" python=3.12
+    conda activate esanet2025
+
+    python -m pip install opencv-python matplotlib pandas tqdm
+    python -m pip install torch torchvision
+    python -m pip install cityscapesScripts
+    ```
+
+    Original environment from paper - go back to
+    [49d2201](https://github.com/TUI-NICR/ESANet/tree/49d220196f3d27a7949772d543111694b9ca3b16) and run:
+   
+    ```bash
     conda env create -f rgbd_segmentation.yaml
-    # activate environment
+
     conda activate rgbd_segmentation
     ```
 
-3. Data preparation (training / evaluation / dataset inference):  
+4. Data preparation (training / evaluation / dataset inference):  
     We trained our networks on 
     [NYUv2](https://cs.nyu.edu/~silberman/datasets/nyu_depth_v2.html), 
     [SUNRGB-D](https://rgbd.cs.princeton.edu/), and 
@@ -93,23 +144,62 @@ Robotics and Automation (ICRA).
     the created datasets in `./datasets`.
     For ImageNet, we used [TensorFlowDatasets](https://www.tensorflow.org/datasets/catalog/imagenet2012) (see `imagenet_pretraining.py`).
 
-4. Pretrained models (evaluation):  
-   We provide the weights for our selected ESANet-R34-NBt1D (with ResNet34 NBt1D backbones) on NYUv2, SunRGBD, and Cityscapes:
+5. Pretrained models (evaluation):  
+    We provide the weights for our selected ESANet-R34-NBt1D (with ResNet34 NBt1D backbones) on NYUv2, SunRGBD, and Cityscapes:
    
-   | Dataset                 | Model                            | mIoU  | FPS*     | URL  |
-   |-------------------------|----------------------------------|-------|----------|------|
-   | NYUv2 (test)            | ESANet-R34-NBt1D                 | 50.30 | 29.7     | [Download](https://drive.google.com/uc?id=1C5-kJv4w3foicEudP3DAjdIXVuzUK7O8) |
-   |                         | ESANet-R34-NBt1D (pre. SceneNet) | 51.58 | 29.7     | [Download](https://drive.google.com/uc?id=1w_Qa8AWUC6uHzQamwu-PAqA7P00hgl8w) |
-   | SUNRGB-D (test)         | ESANet-R34-NBt1D                 | 48.17 | 29.7**   | [Download](https://drive.google.com/uc?id=1tviMAEOr-6lJphpluGvdhBDA_FetIR14) |
-   |                         | ESANet-R34-NBt1D (pre. SceneNet) | 48.04 | 29.7**   | [Download](https://drive.google.com/uc?id=1ukKafozmAcr8fQLbVvTtioKPLwTu0XZO) |
-   | Cityscapes (valid half) | ESANet-R34-NBt1D                 | 75.22 | 23.4     | [Download](https://drive.google.com/uc?id=1xal13D_lXYVlfJx_NBiPTvuf4Ijn7wrt) |
-   | Cityscapes (valid full) | ESANet-R34-NBt1D                 | 80.09 | 6.2      | [Download](https://drive.google.com/uc?id=18eKh2XD9fwdYCUM4MuCYxH7jNucIYk8O) |
+    | Dataset                 | Model                            | mIoU  | FPS*     | URL  |
+    |-------------------------|----------------------------------|-------|----------|------|
+    | NYUv2 (test)            | ESANet-R34-NBt1D                 | 50.30 | 29.7     | [Download](https://drive.google.com/uc?id=1C5-kJv4w3foicEudP3DAjdIXVuzUK7O8) |
+    |                         | ESANet-R34-NBt1D (pre. SceneNet) | 51.58 | 29.7     | [Download](https://drive.google.com/uc?id=1w_Qa8AWUC6uHzQamwu-PAqA7P00hgl8w) |
+    | SUNRGB-D (test)         | ESANet-R34-NBt1D                 | 48.17 | 29.7**   | [Download](https://drive.google.com/uc?id=1tviMAEOr-6lJphpluGvdhBDA_FetIR14) |
+    |                         | ESANet-R34-NBt1D (pre. SceneNet) | 48.04 | 29.7**   | [Download](https://drive.google.com/uc?id=1ukKafozmAcr8fQLbVvTtioKPLwTu0XZO) |
+    | Cityscapes (valid half) | ESANet-R34-NBt1D                 | 75.22 | 23.4     | [Download](https://drive.google.com/uc?id=1xal13D_lXYVlfJx_NBiPTvuf4Ijn7wrt) |
+    | Cityscapes (valid full) | ESANet-R34-NBt1D                 | 80.09 | 6.2      | [Download](https://drive.google.com/uc?id=18eKh2XD9fwdYCUM4MuCYxH7jNucIYk8O) |
    
-   Download and extract the models to `./trained_models`.
-   
+    Download and extract the models to `./trained_models`, or use the following commands:
+
+    ```bash
+    python -m pip install gdown  # tested: gdown 5.2.0
+    cd ./trained_models
+
+    # NYUv2
+    gdown 1C5-kJv4w3foicEudP3DAjdIXVuzUK7O8  # nyuv2_r34_NBt1D.tar.gz
+    gdown 1w_Qa8AWUC6uHzQamwu-PAqA7P00hgl8w  # nyuv2_r34_NBt1D_scenenet.tar.gz
+
+    # SUNRGB-D
+    gdown 1tviMAEOr-6lJphpluGvdhBDA_FetIR14  # sunrgbd_r34_NBt1D.tar.gz
+    gdown 1ukKafozmAcr8fQLbVvTtioKPLwTu0XZO  # sunrgbd_r34_NBt1D_scenenet.tar.gz
+
+    # Cityscapes
+    gdown 1xal13D_lXYVlfJx_NBiPTvuf4Ijn7wrt  # cityscapes_r34_NBt1D_half.tar.gz
+    gdown 18eKh2XD9fwdYCUM4MuCYxH7jNucIYk8O  # cityscapes_r34_NBt1D_full.tar.gz
+
+    # extract
+    find . -name "*.tar.gz" -exec tar -xvzf {} \;
+    ```
+
    *We report the FPS for NVIDIA Jetson AGX Xavier (Jetpack 4.4, TensorRT 7.1, Float16).   
    **Note that we only reported the inference time for NYUv2 in our paper as it has more classes than SUNRGB-D. 
    Thus, the FPS for SUNRGB-D can be slightly higher (37 vs. 40 classes).  
+
+## Changelog
+2025-12-18 (first major update since 2021):
+- replace implementation for mIoU metric with pure PyTorch version to avoid 
+  dependencies on TensorFlow or PyTorch Ignite
+- updated conda environment (Python 3.12 and PyTorch 2.9.1 -> env_esanet2025.yaml)
+- add support for macOS with MPS backend (Python 3.12 and 
+  PyTorch 2.9.1 -> env_esanet2025_mac.yaml)
+- fix lambda pickling issues when using multiple workers in DataLoader
+- force that RandomCrop to always returns a contiguous array
+- fix issues with RandomHSV augmentation (wrong range for value channel)
+  -> might slightly affect training results
+- minor dataset preparation instruction updates
+- add arguments `--toolbox_filepath` and `--data_filepath` to SUNRGB-D 
+  preparation script to enable reusing already downloaded toolbox and data files
+- switch to Apache 2.0 license 
+- add note to corresponding PhD thesis
+
+Note: Updates do not include inference on the Jetson. See the corresponding PhD thesis for more recent timing results.
 
 ## Content
 There are subsection for different things to do:
@@ -289,6 +379,15 @@ here for clarity.
 encoder backbone ResNet-34 NBt1D. You can download our pretrained weights on 
 ImageNet from [Link](https://drive.google.com/uc?id=1neUb6SJ87dIY1VvrSGxurVBQlH8Pd_Bi). 
 Otherwise, you can use `imagenet_pretraining.py` to create your own pretrained weights.
+
+```bash
+python -m pip install gdown  # tested: gdown 5.2.0
+cd ./trained_models
+
+# ImageNet pretrained weights
+gdown 1neUb6SJ87dIY1VvrSGxurVBQlH8Pd_Bi  # imagenet_r34_NBt1D.tar.gz
+tar -xvzf imagenet_r34_NBt1D.tar.gz
+```
 
 Examples: 
 - Train our ESANet-R34-NBt1D on NYUv2 (except for the dataset arguments, also 

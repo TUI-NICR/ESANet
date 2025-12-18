@@ -1,0 +1,75 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Eval NYUv2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "eval.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "nyuv2",
+                "--dataset_dir", "./datasets/nyuv2",
+                "--ckpt_path", "./trained_models/nyuv2/r34_NBt1D.pth",
+                "--batch_size_valid", "32"
+            ]
+        },
+        {
+            "name": "Eval SUN RGB-D",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "eval.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "sunrgbd",
+                "--dataset_dir", "./datasets/sunrgbd",
+                "--ckpt_path", "./trained_models/sunrgbd/r34_NBt1D.pth",
+                "--batch_size_valid", "32"
+            ]
+        },
+        {
+            "name": "Eval Cityscapes (valid, half)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "eval.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "cityscapes-with-depth",
+                "--dataset_dir", "./datasets/cityscapes",
+                "--ckpt_path", "./trained_models/cityscapes/r34_NBt1D_half.pth",
+                "--height", "512",
+                "--width", "1024",
+                "--raw_depth",
+                "--context_module", "appm-1-2-4-8",
+            ]
+        },
+        {
+            "name": "Inference NYUv2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "inference_dataset.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "nyuv2",
+                "--dataset_dir", "./datasets/nyuv2",
+                "--ckpt_path", "./trained_models/nyuv2/r34_NBt1D.pth",
+                "--batch_size", "4"
+            ]
+        },
+        {
+            "name": "Train NYUv2",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "train.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--dataset", "nyuv2",
+                "--dataset_dir", "./datasets/nyuv2",
+                "--pretrained_dir", "./trained_models/imagenet",
+                "--results_dir", "./results",
+                // "--workers", "0",
+                // "--debug",
+            ]
+        }
+    ]
+}

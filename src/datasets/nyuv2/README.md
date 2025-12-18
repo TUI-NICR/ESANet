@@ -9,13 +9,17 @@ For more details, see: [NYU Depth Dataset V2](https://cs.nyu.edu/~silberman/data
 
 1. Install requirements:
 ```bash
-pip install -r ./requirements.txt [--user]
+python -m pip install -r ./requirements.txt
 ```
 
 2. Convert dataset:
 ```bash
-# cd to this directory
+# cd to this directory and run:
 python prepare_dataset.py ../../../datasets/nyuv2
+
+# if you already downloaded the mat file manually, use:
+python prepare_dataset.py ../../../datasets/nyuv2 \
+    --mat_filepath /path/to/nyu_depth_v2_labeled.mat
 ```
 
 ## Use dataset

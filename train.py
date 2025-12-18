@@ -29,7 +29,7 @@ from src.utils import load_ckpt
 from src.utils import print_log
 
 from src.logger import CSVLogger
-from src.confusion_matrix import ConfusionMatrixTensorflow
+from src.metric import MeanIntersectionOverUnion
 
 
 def parse_args():
@@ -85,6 +85,7 @@ def train_main():
         class_weighting = train_loader.dataset.compute_class_weights(
             weight_mode=args.class_weighting,
             c=args.c_for_logarithmic_weighting)
+        class_weighting = class_weighting.astype(np.float32)
     else:
         class_weighting = np.ones(n_classes_without_void)
 
@@ -182,13 +183,12 @@ def train_main():
     csvlogger = CSVLogger(log_keys_for_csv, os.path.join(ckpt_dir, 'logs.csv'),
                           append=True)
 
-    # one confusion matrix per camera and one for whole valid data
-    confusion_matrices = dict()
-    for camera in cameras:
-        confusion_matrices[camera] = \
-            ConfusionMatrixTensorflow(n_classes_without_void)
-        confusion_matrices['all'] = \
-            ConfusionMatrixTensorflow(n_classes_without_void)
+    # one miou object per camera and one for whole valid data
+    metrics = {
+        camera: MeanIntersectionOverUnion(n_classes=n_classes_without_void)
+        for camera in cameras
+    }
+    metrics['all'] = MeanIntersectionOverUnion(n_classes=n_classes_without_void)
 
     # start training -----------------------------------------------------------
     for epoch in range(int(start_epoch), args.epochs):
@@ -206,7 +206,7 @@ def train_main():
         # validation after every epoch -----------------------------------------
         miou, logs = validate(
             model, valid_loader, device, cameras,
-            confusion_matrices, args.modality, loss_function_valid, logs,
+            metrics, args.modality, loss_function_valid, logs,
             ckpt_dir, epoch, loss_function_valid_unweighted,
             debug_mode=args.debug
         )
@@ -214,7 +214,7 @@ def train_main():
         if args.valid_full_res:
             miou_full_res, logs = validate(
                 model, valid_loader_full_res, device, cameras,
-                confusion_matrices, args.modality, loss_function_valid, logs,
+                metrics, args.modality, loss_function_valid, logs,
                 ckpt_dir,
                 epoch, loss_function_valid_unweighted,
                 add_log_key='_full-res', debug_mode=args.debug
@@ -347,7 +347,7 @@ def train_one_epoch(model, train_loader, device, optimizer, loss_function_train,
     return logs
 
 
-def validate(model, valid_loader, device, cameras, confusion_matrices,
+def validate(model, valid_loader, device, cameras, metrics,
              modality, loss_function_valid, logs, ckpt_dir, epoch,
              loss_function_valid_unweighted=None, add_log_key='',
              debug_mode=False):
@@ -366,8 +366,8 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
     model.eval()
 
     # we want to store miou and ious for each camera
-    miou = dict()
-    ious = dict()
+    miou = {}
+    ious = {}
 
     # reset loss (of last validation) to zero
     loss_function_valid.reset_loss()
@@ -380,7 +380,7 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
     # segmentation size.
     for camera in cameras:
         with valid_loader.dataset.filter_camera(camera):
-            confusion_matrices[camera].reset_conf_matrix()
+            metrics[camera].reset()
             print(f'{camera}: {len(valid_loader.dataset)} samples')
 
             for i, sample in enumerate(valid_loader):
@@ -390,7 +390,7 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
                     image = sample['image'].to(device)
                 if modality in ['rgbd', 'depth']:
                     depth = sample['depth'].to(device)
-                if not device.type == 'cpu':
+                if device.type == 'cuda':
                     torch.cuda.synchronize()
                 copy_to_gpu_time += time.time() - copy_to_gpu_time_start
 
@@ -403,7 +403,7 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
                         prediction = model(image)
                     else:
                         prediction = model(depth)
-                    if not device.type == 'cpu':
+                    if device.type == 'cuda':
                         torch.cuda.synchronize()
                     forward_time += time.time() - forward_time_start
 
@@ -449,15 +449,12 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
                     # matrix is faster on cpu
                     prediction = prediction.cpu()
 
-                    label = label.numpy()
-                    prediction = prediction.numpy()
                     post_processing_time += \
                         time.time() - post_processing_time_start
 
                     # finally compute the confusion matrix
                     cm_start_time = time.time()
-                    confusion_matrices[camera].update_conf_matrix(label,
-                                                                  prediction)
+                    metrics[camera].update(prediction, label)
                     cm_time += time.time() - cm_start_time
 
                     if debug_mode:
@@ -467,21 +464,21 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
             # After all examples of camera are passed through the model,
             # we can compute miou and ious.
             cm_start_time = time.time()
-            miou[camera], ious[camera] = \
-                confusion_matrices[camera].compute_miou()
+            miou[camera], ious[camera] = metrics[camera].compute(
+                return_ious=True
+            )
             cm_time += time.time() - cm_start_time
             print(f'mIoU {valid_split} {camera}: {miou[camera]}')
 
     # confusion matrix for the whole split
     # (sum up the confusion matrices of all cameras)
     cm_start_time = time.time()
-    confusion_matrices['all'].reset_conf_matrix()
+    metrics['all'].reset()
     for camera in cameras:
-        confusion_matrices['all'].overall_confusion_matrix += \
-            confusion_matrices[camera].overall_confusion_matrix
+        metrics['all'].update_cm(metrics[camera].cm)
 
     # miou and iou for all cameras
-    miou['all'], ious['all'] = confusion_matrices['all'].compute_miou()
+    miou['all'], ious['all'] = metrics['all'].compute(return_ious=True)
     cm_time += time.time() - cm_start_time
     print(f"mIoU {valid_split}: {miou['all']}")
 
@@ -491,9 +488,13 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
     # This helps if we want to compute other metrics later.
     with open(os.path.join(ckpt_dir, 'confusion_matrices',
                            f'cm_epoch_{epoch}.pickle'), 'wb') as f:
-        pickle.dump({k: cm.overall_confusion_matrix
-                     for k, cm in confusion_matrices.items()}, f,
-                    protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(
+            {
+                k: metric.cm.cpu().numpy().tolist()
+                for k, metric in metrics.items()
+            },
+            f, protocol=pickle.HIGHEST_PROTOCOL
+        )
 
     # logs for the csv logger and the web logger
     logs[f'loss_{valid_split}'] = \
@@ -503,9 +504,9 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
         logs[f'loss_{valid_split}_unweighted'] = \
             loss_function_valid_unweighted.compute_whole_loss()
 
-    logs[f'mIoU_{valid_split}'] = miou['all']
+    logs[f'mIoU_{valid_split}'] = miou['all'].item()
     for camera in cameras:
-        logs[f'mIoU_{valid_split}_{camera}'] = miou[camera]
+        logs[f'mIoU_{valid_split}_{camera}'] = miou[camera].item()
 
     logs['time_validation'] = validation_time
     logs['time_confusion_matrix'] = cm_time
@@ -515,7 +516,7 @@ def validate(model, valid_loader, device, cameras, confusion_matrices,
 
     # write iou value of every class to logs
     for i, iou_value in enumerate(ious['all']):
-        logs[f'IoU_{valid_split}_class_{i}'] = iou_value
+        logs[f'IoU_{valid_split}_class_{i}'] = iou_value.item()
 
     return miou, logs
 

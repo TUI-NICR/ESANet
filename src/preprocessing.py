@@ -28,9 +28,7 @@ def get_preprocessor(depth_mean,
         transform_list = [
             RandomRescale(train_random_rescale),
             RandomCrop(crop_height=height, crop_width=width),
-            RandomHSV((0.9, 1.1),
-                      (0.9, 1.1),
-                      (25, 25)),
+            RandomHSV((0.9, 1.1), (0.9, 1.1), (0.9, 1.1)),
             RandomFlip(),
             ToTensor(),
             Normalize(depth_mean=depth_mean,
@@ -122,9 +120,15 @@ class RandomCrop:
         else:
             i = np.random.randint(0, h - self.crop_height)
             j = np.random.randint(0, w - self.crop_width)
-            image = image[i:i + self.crop_height, j:j + self.crop_width, :]
-            depth = depth[i:i + self.crop_height, j:j + self.crop_width]
-            label = label[i:i + self.crop_height, j:j + self.crop_width]
+            image = np.ascontiguousarray(
+                image[i:i + self.crop_height, j:j + self.crop_width, :]
+            )
+            depth = np.ascontiguousarray(
+                depth[i:i + self.crop_height, j:j + self.crop_width]
+            )
+            label = np.ascontiguousarray(
+                label[i:i + self.crop_height, j:j + self.crop_width]
+            )
             sample['image'] = image
             sample['depth'] = depth
             sample['label'] = label
@@ -142,19 +146,22 @@ class RandomHSV:
 
     def __call__(self, sample):
         img = sample['image']
-        img_hsv = matplotlib.colors.rgb_to_hsv(img)
+        # img is RGB in uint8, i.e., in [0, 255]
+        img_float = img.astype('float32') / 255.0
+        img_hsv = matplotlib.colors.rgb_to_hsv(img_float)
         img_h = img_hsv[:, :, 0]
         img_s = img_hsv[:, :, 1]
         img_v = img_hsv[:, :, 2]
 
         h_random = np.random.uniform(min(self.h_range), max(self.h_range))
         s_random = np.random.uniform(min(self.s_range), max(self.s_range))
-        v_random = np.random.uniform(-min(self.v_range), max(self.v_range))
+        v_random = np.random.uniform(min(self.v_range), max(self.v_range))
         img_h = np.clip(img_h * h_random, 0, 1)
         img_s = np.clip(img_s * s_random, 0, 1)
-        img_v = np.clip(img_v + v_random, 0, 255)
+        img_v = np.clip(img_v * v_random, 0, 1)
         img_hsv = np.stack([img_h, img_s, img_v], axis=2)
         img_new = matplotlib.colors.hsv_to_rgb(img_hsv)
+        img_new = (img_new * 255).astype('uint8')
 
         sample['image'] = img_new
 

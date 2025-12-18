@@ -127,3 +127,5 @@ todo.txt
 *.pdf
 results
 *.svg
+
+datasets_raw
