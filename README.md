@@ -4,7 +4,7 @@
 
 > 🔥 You may also want to have a look at our follow-up works:  
 • [EMSANet](https://github.com/TUI-NICR/EMSANet) [IJCNN 2022] and [EMSFormer](https://github.com/TUI-NICR/EMSFormer) [IJCNN 2023] – multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base  
-• [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] – efficient prediction of dense visual embeddings instead of fixed semantic classes for scene enhanced understanding  
+• [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] – efficient prediction of dense visual embeddings instead of fixed semantic classes for enhanced scene understanding  
 • [SemanticNDT](https://github.com/TUI-NICR/semantic-mapping) [ICRA 2022] and [PanopticNDT](https://github.com/TUI-NICR/panoptic-mapping) [IROS 2023] – downstream application for semantic/panoptic mapping.
 
 This repository contains the code to our paper "Efficient RGB-D Semantic 
@@ -190,7 +190,7 @@ The dissertation is written in German, but it can certainly be translated automa
 - add support for macOS with MPS backend (Python 3.12 and 
   PyTorch 2.9.1 -> env_esanet2025_mac.yaml)
 - fix lambda pickling issues when using multiple workers in DataLoader
-- force that RandomCrop to always returns a contiguous array
+- force RandomCrop to always returns a contiguous array
 - fix issues with RandomHSV augmentation (wrong range for value channel)
   -> might slightly affect training results
 - minor dataset preparation instruction updates
