@@ -1,7 +1,8 @@
 # ESANet: Efficient RGB-D Semantic Segmentation for Indoor Scene Analysis
 
-> 🔥 2025-12-18: updated to keep it working in 2025+ (see full changelog below)
+**🔥 2025-12-18: updated to keep it working in 2025+ (see full [changelog](#changelog) below)**
 
+> [!TIP]
 > 🔥 You may also want to have a look at our follow-up works:  
 • [EMSANet](https://github.com/TUI-NICR/EMSANet) [IJCNN 2022] and [EMSFormer](https://github.com/TUI-NICR/EMSFormer) [IJCNN 2023] – multi-task approach, better results for semantic segmentation, and cleaner and more extendable code base  
 • [DVEFormer](https://github.com/TUI-NICR/DVEFormer) [IROS 2025] – efficient prediction of dense visual embeddings instead of fixed semantic classes for enhanced scene understanding  
@@ -199,7 +200,8 @@ The dissertation is written in German, but it can certainly be translated automa
 - switch to Apache 2.0 license 
 - add note to corresponding PhD thesis
 
-Note: Updates do not include inference on the Jetson. See the corresponding PhD thesis for more recent timing results.
+> [!NOTE]
+> Updates do not include inference on the Jetson. See the corresponding [PhD thesis](#license-and-citations) above for more recent timing results.
 
 ## Content
 There are subsection for different things to do:
@@ -212,7 +214,8 @@ There are subsection for different things to do:
 ## Evaluation
 To reproduce the mIoUs reported in our paper, use `eval.py`.
 
-> Note that building the model correctly depends on the respective dataset the 
+> [!NOTE]
+> Building the model correctly depends on the respective dataset the 
 model was trained on. Passing no additional model arguments to `eval.py` 
 defaults to evaluating our ESANet-R34-NBt1D either on NYUv2 or SUNRGB-D. 
 For Cityscapes the parameters differ. You will find a `argsv_*.txt` file next 
@@ -282,7 +285,8 @@ We provide scripts for inference on both sample input images
 (`inference_samples.py`) and samples drawn from one of our used datasets 
 (`inference_dataset.py`). 
 
-> Note that building the model correctly depends on the respective dataset the 
+> [!NOTE]
+> Building the model correctly depends on the respective dataset the 
 model was trained on. Passing no additional model arguments to `eval.py` 
 defaults to evaluating our ESANet-R34-NBt1D either on NYUv2 or SUNRGB-D. 
 For Cityscapes the parameters differ. You will find a `argsv_*.txt` file next 
@@ -308,7 +312,8 @@ python inference_dataset.py \
 Use `inference_samples.py` to apply a trained model to the samples given in 
 `./samples`.
 
-> Note that the dataset argument is required to determine the correct 
+> [!NOTE]
+> The dataset argument is required to determine the correct 
 preprocessing and the class colors. However, you do not need to prepare the 
 respective dataset. Furthermore, depending on the given depth images and the 
 used dataset for training, an additional depth scaling might be necessary.
@@ -361,7 +366,8 @@ python3 inference_time_whole_model.py \
     --no_time_onnxruntime \
     --trt_floatx 16
 ``` 
-> Note that a Jetpack version earlier than 4.4 fails completely or results in 
+> [!NOTE]
+> A Jetpack version earlier than 4.4 fails completely or results in 
 deviating outputs due to differently handled upsampling.
 
 To reproduce the timings of other models we compared in our paper to, follow the 
@@ -375,10 +381,12 @@ The arguments default to training ESANet-R34-NBt1D on NYUv2 with the
 hyper-parameters from our paper. Thus, they could be omitted but are presented 
 here for clarity.
 
-> Note that training ESANet-R34-NBt1D requires the pretrained weights for the 
+> [!NOTE]
+> Training ESANet-R34-NBt1D requires the pretrained weights for the 
 encoder backbone ResNet-34 NBt1D. You can download our pretrained weights on 
 ImageNet from [Link](https://drive.google.com/uc?id=1neUb6SJ87dIY1VvrSGxurVBQlH8Pd_Bi). 
-Otherwise, you can use `imagenet_pretraining.py` to create your own pretrained weights.
+Otherwise, you can use `imagenet_pretraining.py` to create your own pretrained weights
+(pretraining dependencies are not covered by provided environment files).
 
 ```bash
 python -m pip install gdown  # tested: gdown 5.2.0
@@ -458,6 +466,7 @@ valid for SUNRGB-D):
 For further information, use `python train.py --help` or take a look at 
 `src/args.py`.
 
+> [!TIP]
 > To analyze the model structure, use `model_to_onnx.py` with the same 
 arguments to export an ONNX model file, which can be nicely visualized using 
 [Netron](https://github.com/lutzroeder/netron).
