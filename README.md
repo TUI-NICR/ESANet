@@ -103,7 +103,7 @@ The dissertation is written in German, but it can certainly be translated automa
     ```
 
 2. Set up anaconda environment including all dependencies:  
-    Updated environment from 2025 (Python 3.12, PyTorch 2.9.1, no TensorFlow and PyTorch Ignite anymore):
+    **Option 1**: Updated environment from 2025 (Python 3.12, PyTorch 2.9.1, no TensorFlow and PyTorch Ignite anymore):
     ```bash
     conda env create -f env_esanet2025_mac.yaml  # macos with mps
     conda env create -f env_esanet2025.yaml   # linux with cuda
@@ -111,7 +111,7 @@ The dissertation is written in German, but it can certainly be translated automa
     conda activate esanet2025
     ```
     
-    Create your own conda environment:
+    **Option 2**: Create your own conda environment:
     ```bash
     conda create --name "esanet2025" python=3.12
     conda activate esanet2025
@@ -121,7 +121,7 @@ The dissertation is written in German, but it can certainly be translated automa
     python -m pip install cityscapesScripts
     ```
 
-    Original environment from paper - go back to
+    **Option 3**: Environment from original publication - go back to
     [49d2201](https://github.com/TUI-NICR/ESANet/tree/49d220196f3d27a7949772d543111694b9ca3b16) and run:
    
     ```bash
